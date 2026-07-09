@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>داشبورد آکادمی تنیس</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Tahoma, 'Segoe UI', sans-serif;
+  background: #f4f6f9;
+  color: #2d3748;
+  direction: rtl;
+}
+
+/* ── Header ── */
+.header {
+  background: #1a4e8a;
+  color: #fff;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.header-title { font-size: 18px; font-weight: bold; }
+.header-sub   { font-size: 12px; opacity: .75; margin-top: 2px; }
+.header-sync  {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; opacity: .85;
+}
+#sync-time { font-size: 11px; opacity: .7; }
+
+/* ── Branch pills ── */
+.branch-bar {
+  background: #fff;
+  padding: 10px 24px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #e2e8f0;
+}
+.pill {
+  padding: 5px 14px; border-radius: 20px; font-size: 12px;
+  border: 1px solid #cbd5e0; cursor: pointer;
+  background: #fff; color: #4a5568; transition: all .15s;
+}
+.pill.active { background: #1a4e8a; color: #fff; border-color: #1a4e8a; }
+
+/* ── Nav ── */
+.nav {
+  background: #fff;
+  display: flex;
+  border-bottom: 2px solid #e2e8f0;
+  overflow-x: auto;
+  padding: 0 16px;
+}
+.nav-tab {
+  padding: 12px 18px; font-size: 13px; cursor: pointer;
+  color: #718096; border-bottom: 2px solid transparent;
+  margin-bottom: -2px; white-space: nowrap;
+  transition: all .15s;
+}
+.nav-tab.active { color: #1a4e8a; border-bottom-color: #1a4e8a; font-weight: bold; }
+
+/* ── Main ── */
+.main { padding: 20px 24px; max-width: 1200px; margin: 0 auto; }
+
+/* ── Metrics ── */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.metric {
+  background: #fff; border-radius: 10px;
+  padding: 16px; border: 1px solid #e2e8f0;
+}
+.metric-label { font-size: 12px; color: #718096; margin-bottom: 6px; }
+.metric-value { font-size: 26px; font-weight: bold; color: #2d3748; }
+.metric-sub   { font-size: 11px; color: #a0aec0; margin-top: 4px; }
+.metric-up    { color: #38a169; }
+.metric-down  { color: #e53e3e; }
+
+/* ── Section ── */
+.section-title {
+  font-size: 14px; font-weight: bold; color: #4a5568;
+  margin: 0 0 12px; padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* ── Table ── */
+.table-wrap { overflow-x: auto; margin-bottom: 22px; }
+table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px; background: #fff;
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+th {
+  background: #f7fafc; padding: 10px 14px;
+  text-align: right; font-weight: bold;
+  font-size: 12px; color: #718096;
+  border-bottom: 1px solid #e2e8f0;
+}
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #2d3748;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #f7fafc; }
+
+/* ── Badge ── */
+.badge {
+  display: inline-block; padding: 3px 10px;
+  border-radius: 12px; font-size: 11px; font-weight: bold;
+}
+.b-green  { background: #c6f6d5; color: #276749; }
+.b-red    { background: #fed7d7; color: #9b2c2c; }
+.b-yellow { background: #fefcbf; color: #744210; }
+.b-blue   { background: #bee3f8; color: #2c5282; }
+.b-gray   { background: #edf2f7; color: #4a5568; }
+
+/* ── Card ── */
+.card {
+  background: #fff; border-radius: 10px;
+  border: 1px solid #e2e8f0; padding: 18px;
+  margin-bottom: 16px;
+}
+
+/* ── Two col ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+/* ── Skill bar ── */
+.skill-row { margin-bottom: 10px; }
+.skill-head { display: flex; justify-content: space-between; font-size: 12px; color: #718096; margin-bottom: 4px; }
+.skill-bg { height: 7px; background: #edf2f7; border-radius: 4px; overflow: hidden; }
+.skill-fill { height: 100%; border-radius: 4px; transition: width .5s; }
+
+/* ── Calc ── */
+.calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.calc-label { font-size: 12px; color: #718096; margin-bottom: 4px; }
+.calc-result {
+  background: #ebf8ff; border: 1px solid #bee3f8;
+  border-radius: 10px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.calc-result-label { font-size: 13px; color: #2b6cb0; }
+.calc-result-value { font-size: 24px; font-weight: bold; color: #2b6cb0; }
+
+/* ── Term row ── */
+.term-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: 8px;
+  border: 1px solid #e2e8f0; margin-bottom: 8px;
+  background: #fff;
+}
+.term-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── Loading / Error ── */
+.loading {
+  text-align: center; padding: 40px;
+  color: #718096; font-size: 14px;
+}
+.spinner {
+  display: inline-block; width: 30px; height: 30px;
+  border: 3px solid #bee3f8; border-top-color: #1a4e8a;
+  border-radius: 50%; animation: spin .7s linear infinite;
+  margin-bottom: 10px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.error-box {
+  background: #fff5f5; border: 1px solid #fed7d7;
+  border-radius: 8px; padding: 14px; color: #c53030;
+  font-size: 13px; margin-bottom: 16px;
+}
+
+/* ── Panel ── */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ── Loyalty ── */
+.loyalty-steps { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.loyalty-step {
+  flex: 1; min-width: 70px; text-align: center;
+  padding: 10px 6px; border-radius: 8px;
+  border: 1px solid #e2e8f0; background: #f7fafc;
+}
+.loyalty-step.done { background: #ebf8ff; border-color: #bee3f8; }
+.loyalty-pct { font-size: 16px; font-weight: bold; color: #2b6cb0; }
+.loyalty-lbl { font-size: 11px; color: #a0aec0; margin-top: 2px; }
+
+/* ── Branch grid ── */
+.branch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 10px; margin-bottom: 16px; }
+.branch-card {
+  border: 1px solid #e2e8f0; border-radius: 10px;
+  padding: 14px; background: #fff; cursor: pointer;
+  transition: all .15s;
+}
+.branch-card:hover { border-color: #1a4e8a; background: #f0f7ff; }
+.branch-name { font-size: 13px; font-weight: bold; margin-bottom: 6px; }
+.branch-stat { font-size: 12px; color: #718096; line-height: 1.7; }
+
+/* ── Session bar ── */
+.session-bar { display: flex; border-radius: 6px; overflow: hidden; border: 1px solid #e2e8f0; margin-bottom: 10px; }
+.session-cell { flex: 1; padding: 7px 3px; text-align: center; font-size: 11px; font-weight: bold; }
+
+/* ── Charter ── */
+.charter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 12px; }
+.charter-item {
+  border: 1px solid #e2e8f0; border-radius: 8px;
+  padding: 14px; background: #fff;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.charter-icon { font-size: 22px; flex-shrink: 0; }
+.charter-title { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
+.charter-text  { font-size: 12px; color: #718096; line-height: 1.6; }
+
+select, input { font-family: Tahoma, sans-serif; }
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<div class="header">
+  <div>
+    <div class="header-title">🎾 داشبورد آکادمی تنیس</div>
+    <div class="header-sub" id="branch-label">همه شعبات — ترم بهار ۱۴۰۴</div>
+  </div>
+  <div class="header-sync">
+    <span id="sync-status">⏳ در حال بارگذاری...</span>
+    <span id="sync-time"></span>
+    <button onclick="loadAll()" style="padding:5px 12px;font-size:12px;border-radius:6px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;cursor:pointer">🔄 بروزرسانی</button>
+  </div>
+</div>
+
+<!-- ══ BRANCH PILLS ══ -->
+<div class="branch-bar">
+  <div class="pill active" onclick="setBranch(this,'همه')">همه</div>
+  <div class="pill" onclick="setBranch(this,'بابل')">بابل</div>
+  <div class="pill" onclick="setBranch(this,'ساری')">ساری</div>
+  <div class="pill" onclick="setBranch(this,'تهران')">تهران</div>
+  <div class="pill" onclick="setBranch(this,'قائمشهر')">قائمشهر</div>
+  <div class="pill" onclick="setBranch(this,'نوشهر')">نوشهر</div>
+  <div class="pill" onclick="setBranch(this,'سمنان')">سمنان</div>
+  <div class="pill" onclick="setBranch(this,'تبریز')">تبریز</div>
+</div>
+
+<!-- ══ NAV ══ -->
+<div class="nav">
+  <div class="nav-tab active" onclick="showTab('overview',this)">📊 نمای کلی</div>
+  <div class="nav-tab" onclick="showTab('students',this)">👥 هنرجویان</div>
+  <div class="nav-tab" onclick="showTab('finance',this)">💰 مالی</div>
+  <div class="nav-tab" onclick="showTab('exams',this)">📋 آزمون‌ها</div>
+  <div class="nav-tab" onclick="showTab('attendance',this)">✅ حضور غیاب</div>
+  <div class="nav-tab" onclick="showTab('terms',this)">📅 ترم‌بندی</div>
+  <div class="nav-tab" onclick="showTab('branches',this)">🏢 شعبات</div>
+  <div class="nav-tab" onclick="showTab('charter',this)">📜 منشور</div>
+</div>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+
+  <!-- OVERVIEW -->
+  <div id="panel-overview" class="panel active">
+    <div id="overview-loading" class="loading"><div class="spinner"></div><br>در حال دریافت اطلاعات از Google Sheets...</div>
+    <div id="overview-content" style="display:none">
+      <div class="metrics" id="metrics-grid"></div>
+      <div class="two-col">
+        <div class="card">
+          <div class="section-title">توزیع سطح مهارت</div>
+          <div id="level-bars"></div>
+        </div>
+        <div class="card">
+          <div class="section-title">توزیع شعبات</div>
+          <div id="branch-bars"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STUDENTS -->
+  <div id="panel-students" class="panel">
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <input type="text" id="s-search" placeholder="🔍 جستجوی نام..." oninput="renderStudents()" style="flex:1;min-width:160px;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px">
+      <select id="s-level" onchange="renderStudents()" style="padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px">
+        <option value="">همه سطوح</option>
+        <option>مقدماتی</option><option>متوسط</option>
+        <option>پیشرفته</option><option>حرفه‌ای</option>
+      </select>
+      <select id="s-branch" onchange="renderStudents()" style="padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px">
+        <option value="">همه شعبات</option>
+        <option>بابل</option><option>ساری</option><option>تهران</option>
+        <option>قائمشهر</option><option>نوشهر</option><option>سمنان</option><option>تبریز</option>
+      </select>
+    </div>
+    <div id="students-loading" class="loading"><div class="spinner"></div><br>در حال دریافت...</div>
+    <div id="students-content" style="display:none">
+      <div class="table-wrap"><table id="students-table">
+        <thead><tr>
+          <th>شناسه</th><th>نام</th><th>شعبه</th><th>سطح</th>
+          <th>ترم</th><th>تخفیف</th><th>وضعیت</th><th>موبایل</th>
+        </tr></thead>
+        <tbody id="students-tbody"></tbody>
+      </table></div>
+      <div id="students-count" style="font-size:12px;color:#718096;text-align:left"></div>
+    </div>
+  </div>
+
+  <!-- FINANCE -->
+  <div id="panel-finance" class="panel">
+    <div class="card" style="margin-bottom:18px">
+      <div class="section-title">ماشین‌حساب قیمت‌گذاری</div>
+      <div class="calc-grid">
+        <div>
+          <div class="calc-label">نوع کلاس</div>
+          <select id="c-type" onchange="calcPrice()" style="width:100%;padding:8px;border:1px solid #e2e8f0;border-radius:6px">
+            <option value="3600000">گروهی (۱۲ جلسه) — پایه ۳٫۶م</option>
+            <option value="700000">خصوصی (ساعتی) — پایه ۷۰۰ه</option>
+          </select>
+        </div>
+        <div>
+          <div class="calc-label">وضعیت</div>
+          <select id="c-status" onchange="calcPrice()" style="width:100%;padding:8px;border:1px solid #e2e8f0;border-radius:6px">
+            <option value="0.20">تمدید — افزایش ۲۰٪</option>
+            <option value="0.40">ثبت‌نام جدید — افزایش ۴۰٪</option>
+          </select>
+        </div>
+        <div>
+          <div class="calc-label">تخفیف وفاداری (ترم موفق: <span id="c-terms-lbl">۰</span>)</div>
+          <input type="range" min="0" max="6" value="0" id="c-terms" oninput="calcPrice();document.getElementById('c-terms-lbl').textContent=this.value" style="width:100%">
+        </div>
+        <div>
+          <div class="calc-label">شعبه</div>
+          <select id="c-branch" onchange="calcPrice()" style="width:100%;padding:8px;border:1px solid #e2e8f0;border-radius:6px">
+            <option value="1">بابل / قائمشهر / نوشهر</option>
+            <option value="1.1">ساری / سمنان (+۱۰٪)</option>
+            <option value="1.3">تهران / تبریز (+۳۰٪)</option>
+          </select>
+        </div>
+      </div>
+      <div class="calc-result">
+        <div class="calc-result-label">مبلغ نهایی ترم</div>
+        <div class="calc-result-value" id="c-result">—</div>
+      </div>
+      <div style="font-size:11px;color:#718096;margin-top:8px" id="c-breakdown"></div>
+    </div>
+    <div class="section-title">تراکنش‌های مالی</div>
+    <div id="finance-loading" class="loading"><div class="spinner"></div><br>در حال دریافت...</div>
+    <div id="finance-content" style="display:none">
+      <div class="table-wrap"><table>
+        <thead><tr><th>نام</th><th>شعبه</th><th>ترم</th><th>مبلغ نهایی</th><th>تاریخ</th><th>روش</th><th>وضعیت</th></tr></thead>
+        <tbody id="finance-tbody"></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- EXAMS -->
+  <div id="panel-exams" class="panel">
+    <div id="exams-loading" class="loading"><div class="spinner"></div><br>در حال دریافت...</div>
+    <div id="exams-content" style="display:none">
+      <div class="metrics" id="exam-metrics"></div>
+      <div class="section-title">نمرات آزمون‌ها</div>
+      <div class="table-wrap"><table>
+        <thead><tr>
+          <th>نام</th><th>شعبه</th><th>ترم</th><th>نوع</th>
+          <th>فورهند</th><th>بک‌هند</th><th>والی</th><th>سرویس</th>
+          <th>راهرو</th><th>کراس</th><th>کل</th><th>وضعیت</th>
+        </tr></thead>
+        <tbody id="exams-tbody"></tbody>
+      </table></div>
+
+      <div class="section-title">جلسات ترم — پروتکل ۱۲ جلسه</div>
+      <div class="session-bar" id="session-bar"></div>
+      <div style="display:flex;gap:16px;font-size:11px;color:#718096;flex-wrap:wrap;margin-bottom:16px">
+        <span>🟢 عادی</span><span>🔵 بازی</span><span>🟡 فیلمبرداری</span><span>🔴 آزمون</span>
+      </div>
+      <div class="card">
+        <b style="font-size:13px">سیاست قبولی:</b>
+        <span style="font-size:13px;color:#718096;margin-right:8px">حد نصاب ۶۰/۱۰۰ — اختلاف کمتر از ۵ نمره → آزمون جبرانی — زیر ۵۵ → تکرار ترم</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ATTENDANCE -->
+  <div id="panel-attendance" class="panel">
+    <div id="attendance-loading" class="loading"><div class="spinner"></div><br>در حال دریافت...</div>
+    <div id="attendance-content" style="display:none">
+      <div class="metrics" id="att-metrics"></div>
+      <div class="section-title">لیست حضور و غیاب</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>تاریخ</th><th>نام</th><th>شعبه</th><th>ترم</th><th>جلسه</th><th>نوع</th><th>حضور</th><th>مربی</th><th>یادداشت</th></tr></thead>
+        <tbody id="att-tbody"></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- TERMS -->
+  <div id="panel-terms" class="panel">
+    <div class="section-title">تقویم آکادمیک ۱۴۰۴</div>
+    <div id="term-list"></div>
+    <div class="section-title" style="margin-top:16px">پروتکل هر ترم — ۱۲ هفته</div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>هفته</th><th>فعالیت</th><th>نوع</th></tr></thead>
+      <tbody>
+        <tr><td>۱–۲</td><td>تعیین سطح و آشنایی</td><td><span class="badge b-blue">ارزیابی</span></td></tr>
+        <tr><td>۳–۵</td><td>آموزش پایه (جلسه ۵: فیلمبرداری)</td><td><span class="badge b-gray">آموزش</span></td></tr>
+        <tr><td>۶</td><td>آزمون میان‌ترم</td><td><span class="badge b-yellow">آزمون</span></td></tr>
+        <tr><td>۷–۹</td><td>آموزش پیشرفته (جلسه ۱۰: فیلمبرداری)</td><td><span class="badge b-gray">آموزش</span></td></tr>
+        <tr><td>۱۰–۱۱</td><td>مرور و آمادگی</td><td><span class="badge b-gray">مرور</span></td></tr>
+        <tr><td>۱۲</td><td>آزمون پایان‌ترم و دیپلم</td><td><span class="badge b-red">آزمون نهایی</span></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <!-- BRANCHES -->
+  <div id="panel-branches" class="panel">
+    <div class="section-title">وضعیت شعبات</div>
+    <div class="branch-grid" id="branch-cards"></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>شعبه</th><th>استان</th><th>زمین</th><th>مربی</th><th>ظرفیت</th><th>وضعیت</th></tr></thead>
+      <tbody>
+        <tr><td>بابل</td><td>مازندران</td><td>۳</td><td>۴</td><td>۱۲۰</td><td><span class="badge b-green">فعال</span></td></tr>
+        <tr><td>ساری</td><td>مازندران</td><td>۳</td><td>۳</td><td>۱۰۰</td><td><span class="badge b-green">فعال</span></td></tr>
+        <tr><td>تهران</td><td>تهران</td><td>۴</td><td>۵</td><td>۱۵۰</td><td><span class="badge b-green">فعال</span></td></tr>
+        <tr><td>قائمشهر</td><td>مازندران</td><td>۲</td><td>۲</td><td>۸۰</td><td><span class="badge b-green">فعال</span></td></tr>
+        <tr><td>نوشهر</td><td>مازندران</td><td>۲</td><td>۲</td><td>۶۰</td><td><span class="badge b-green">فعال</span></td></tr>
+        <tr><td>سمنان</td><td>سمنان</td><td>۲</td><td>۲</td><td>۶۰</td><td><span class="badge b-blue">در حال راه‌اندازی</span></td></tr>
+        <tr><td>تبریز</td><td>آذربایجان شرقی</td><td>۲</td><td>۲</td><td>۵۰</td><td><span class="badge b-blue">در حال راه‌اندازی</span></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <!-- CHARTER -->
+  <div id="panel-charter" class="panel">
+    <div class="section-title">منشور کلاس</div>
+    <div class="charter-grid" id="charter-grid"></div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ══════════════════════════════════════════
+//  ⚠️  فقط این یک خط را تغییر دهید  ⚠️
+// ══════════════════════════════════════════
+var API = 'https://script.google.com/macros/s/AKfycbyLUrrflJQRbYbNacLbvUmii9bAkIR1FTGWpSfdCwmF_2mc6nh0gsBFMCMsGCexiS-zzA/exec';
+// ══════════════════════════════════════════
+
+var DATA = { students: [], exams: [], finance: [], attendance: [], summary: {} };
+var currentBranch = 'همه';
+
+// ── fetch helper ──
+function apiFetch(action) {
+  return fetch(API + '?action=' + action)
+    .then(function(r){ return r.json(); })
+    .then(function(j){ return j.success ? j.data : []; })
+    .catch(function(){ return []; });
+}
+
+// ── load all ──
+function loadAll() {
+  document.getElementById('sync-status').textContent = '⏳ در حال بروزرسانی...';
+  Promise.all([
+    apiFetch('students'),
+    apiFetch('exams'),
+    apiFetch('finance'),
+    apiFetch('attendance'),
+    apiFetch('summary')
+  ]).then(function(res) {
+    DATA.students   = res[0] || [];
+    DATA.exams      = res[1] || [];
+    DATA.finance    = res[2] || [];
+    DATA.attendance = res[3] || [];
+    DATA.summary    = res[4] || {};
+    var now = new Date();
+    document.getElementById('sync-status').textContent = '✅ بروز است';
+    document.getElementById('sync-time').textContent =
+      now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
+    renderAll();
+  });
+}
+
+function renderAll() {
+  renderOverview();
+  renderStudents();
+  renderFinanceTable();
+  renderExams();
+  renderAttendance();
+  renderTerms();
+  renderBranches();
+  renderCharter();
+  calcPrice();
+}
+
+// ── branch filter ──
+function setBranch(el, name) {
+  document.querySelectorAll('.pill').forEach(function(p){ p.classList.remove('active'); });
+  el.classList.add('active');
+  currentBranch = name;
+  renderAll();
+}
+
+// ── tab ──
+function showTab(id, el) {
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('panel-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── filter by branch ──
+function byBranch(arr, key) {
+  if (currentBranch === 'همه') return arr;
+  return arr.filter(function(r){ return r[key] === currentBranch; });
+}
+
+// ── format number ──
+function fmt(n) {
+  var num = parseFloat(n) || 0;
+  if (num >= 1000000) return (num/1000000).toFixed(1) + ' م';
+  if (num >= 1000)    return Math.round(num/1000) + ' ه';
+  return Math.round(num).toString();
+}
+
+// ══ OVERVIEW ══
+function renderOverview() {
+  var s = byBranch(DATA.students, 'شعبه');
+  var active = s.filter(function(x){ return x['وضعیت'] === 'فعال'; }).length;
+  var e = byBranch(DATA.exams, 'شعبه');
+  var passed = e.filter(function(x){ return x['وضعیت'] === 'قبول'; }).length;
+  var passRate = e.length ? Math.round(passed/e.length*100) : 0;
+  var f = byBranch(DATA.finance, 'شعبه');
+  var income = f.reduce(function(sum,x){ return sum + (parseFloat(x['مبلغ نهایی'])||0); }, 0);
+  var a = byBranch(DATA.attendance, 'شعبه');
+  var present = a.filter(function(x){ return x['حضور'] === 'حاضر'; }).length;
+  var attRate = a.length ? Math.round(present/a.length*100) : 0;
+
+  document.getElementById('metrics-grid').innerHTML = [
+    {label:'هنرجویان فعال', value: active, sub: 'از ' + s.length + ' نفر ثبت‌نامی'},
+    {label:'نرخ قبولی آزمون', value: passRate + '٪', sub: passed + ' از ' + e.length + ' آزمون'},
+    {label:'نرخ حضور', value: attRate + '٪', sub: present + ' از ' + a.length + ' جلسه'},
+    {label:'درآمد دریافتی', value: fmt(income), sub: 'تومان'},
+  ].map(function(m){
+    return '<div class="metric"><div class="metric-label">'+m.label+'</div>'+
+      '<div class="metric-value">'+m.value+'</div>'+
+      '<div class="metric-sub">'+m.sub+'</div></div>';
+  }).join('');
+
+  // Level bars
+  var levels = {};
+  s.forEach(function(x){ var l = x['سطح']||'نامشخص'; levels[l]=(levels[l]||0)+1; });
+  var colors = {مقدماتی:'#3182ce',متوسط:'#38a169',پیشرفته:'#d69e2e','حرفه‌ای':'#805ad5'};
+  document.getElementById('level-bars').innerHTML = Object.keys(levels).map(function(l){
+    var pct = s.length ? Math.round(levels[l]/s.length*100) : 0;
+    return '<div class="skill-row"><div class="skill-head"><span>'+l+'</span><span>'+pct+'٪ — '+levels[l]+' نفر</span></div>'+
+      '<div class="skill-bg"><div class="skill-fill" style="width:'+pct+'%;background:'+(colors[l]||'#718096')+'"></div></div></div>';
+  }).join('');
+
+  // Branch bars
+  var branches = {};
+  s.forEach(function(x){ var b = x['شعبه']||'نامشخص'; branches[b]=(branches[b]||0)+1; });
+  document.getElementById('branch-bars').innerHTML = Object.keys(branches).map(function(b){
+    var pct = s.length ? Math.round(branches[b]/s.length*100) : 0;
+    return '<div class="skill-row"><div class="skill-head"><span>'+b+'</span><span>'+branches[b]+' نفر</span></div>'+
+      '<div class="skill-bg"><div class="skill-fill" style="width:'+pct+'%;background:#1a4e8a"></div></div></div>';
+  }).join('');
+
+  document.getElementById('overview-loading').style.display = 'none';
+  document.getElementById('overview-content').style.display = 'block';
+}
+
+// ══ STUDENTS ══
+function renderStudents() {
+  var q  = (document.getElementById('s-search')||{value:''}).value;
+  var lv = (document.getElementById('s-level')||{value:''}).value;
+  var br = (document.getElementById('s-branch')||{value:''}).value;
+  var list = DATA.students.filter(function(s){
+    return (!q  || (s['نام']||'').indexOf(q) !== -1 || (s['نام خانوادگی']||'').indexOf(q) !== -1) &&
+           (!lv || s['سطح'] === lv) &&
+           (!br || s['شعبه'] === br) &&
+           (currentBranch === 'همه' || s['شعبه'] === currentBranch);
+  });
+  var statusBadge = {فعال:'b-green',مردود:'b-red','آزمون جبرانی':'b-yellow','تکرار ترم':'b-red','تعلیق موقت':'b-gray'};
+  document.getElementById('students-tbody').innerHTML = list.map(function(s){
+    var status = s['وضعیت'] || '—';
+    return '<tr><td>'+s['شناسه']+'</td><td>'+s['نام']+' '+s['نام خانوادگی']+'</td>'+
+      '<td>'+s['شعبه']+'</td><td>'+s['سطح']+'</td><td>ترم '+s['ترم جاری']+'</td>'+
+      '<td>'+(s['درصد تخفیف وفاداری']>0 ? '<span class="badge b-blue">'+s['درصد تخفیف وفاداری']+'٪</span>' : '—')+'</td>'+
+      '<td><span class="badge '+(statusBadge[status]||'b-gray')+'">'+status+'</span></td>'+
+      '<td>'+s['موبایل']+'</td></tr>';
+  }).join('') || '<tr><td colspan="8" style="text-align:center;color:#718096">نتیجه‌ای یافت نشد</td></tr>';
+
+  document.getElementById('students-count').textContent = list.length + ' هنرجو';
+  document.getElementById('students-loading').style.display = 'none';
+  document.getElementById('students-content').style.display = 'block';
+}
+
+// ══ FINANCE ══
+function calcPrice() {
+  var base   = parseFloat((document.getElementById('c-type')||{value:'3600000'}).value);
+  var inc    = parseFloat((document.getElementById('c-status')||{value:'0.20'}).value);
+  var terms  = parseInt((document.getElementById('c-terms')||{value:'0'}).value);
+  var branch = parseFloat((document.getElementById('c-branch')||{value:'1'}).value);
+  var disc   = Math.min(terms * 0.05, 0.30);
+  var final  = base * (1 + inc) * branch * (1 - disc);
+  var r = document.getElementById('c-result');
+  if (r) r.textContent = Math.round(final).toLocaleString() + ' تومان';
+  var b = document.getElementById('c-breakdown');
+  if (b) b.textContent = 'پایه ' + base.toLocaleString() + ' × افزایش ×' + (1+inc).toFixed(2) + ' × شعبه ×' + branch + ' × تخفیف ' + Math.round(disc*100) + '٪';
+
+  // loyalty visual
+  var steps = document.getElementById('loyalty-steps-fin');
+  if (!steps) {
+    var lv = document.createElement('div');
+    lv.id = 'loyalty-steps-fin'; lv.className = 'loyalty-steps';
+    lv.style.marginTop = '12px';
+    var cr = document.getElementById('c-result');
+    if (cr && cr.parentNode) cr.parentNode.parentNode.appendChild(lv);
+  }
+}
+
+function renderFinanceTable() {
+  var list = byBranch(DATA.finance, 'شعبه');
+  var statusBadge = {'پرداخت شده':'b-green','در انتظار':'b-yellow','لغو شده':'b-red'};
+  document.getElementById('finance-tbody').innerHTML = list.map(function(f){
+    var status = f['وضعیت'] || '—';
+    var amount = parseFloat(f['مبلغ نهایی'])||0;
+    return '<tr><td>'+f['نام هنرجو']+'</td><td>'+f['شعبه']+'</td><td>'+f['ترم']+'</td>'+
+      '<td>'+Math.round(amount).toLocaleString()+' ت</td>'+
+      '<td>'+f['تاریخ']+'</td><td>'+f['روش پرداخت']+'</td>'+
+      '<td><span class="badge '+(statusBadge[status]||'b-gray')+'">'+status+'</span></td></tr>';
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:#718096">داده‌ای یافت نشد</td></tr>';
+  document.getElementById('finance-loading').style.display = 'none';
+  document.getElementById('finance-content').style.display = 'block';
+}
+
+// ══ EXAMS ══
+function renderExams() {
+  var list = byBranch(DATA.exams, 'شعبه');
+  var passed = list.filter(function(e){ return e['وضعیت']==='قبول'; }).length;
+  document.getElementById('exam-metrics').innerHTML = [
+    {label:'تعداد آزمون', value: list.length, sub:''},
+    {label:'قبول', value: passed, sub: Math.round(passed/Math.max(list.length,1)*100)+'٪'},
+    {label:'مردود', value: list.length-passed, sub:''},
+  ].map(function(m){
+    return '<div class="metric"><div class="metric-label">'+m.label+'</div><div class="metric-value">'+m.value+'</div><div class="metric-sub">'+m.sub+'</div></div>';
+  }).join('');
+
+  document.getElementById('exams-tbody').innerHTML = list.map(function(e){
+    var status = e['وضعیت']||'—';
+    return '<tr><td>'+e['نام هنرجو']+'</td><td>'+e['شعبه']+'</td><td>'+e['ترم']+'</td><td>'+e['نوع آزمون']+'</td>'+
+      '<td>'+e['فورهند']+'</td><td>'+e['بک‌هند']+'</td><td>'+e['والی']+'</td>'+
+      '<td>'+e['سرویس']+'</td><td>'+e['راهرو']+'</td><td>'+e['کراس']+'</td>'+
+      '<td><b>'+e['نمره کل']+'</b></td>'+
+      '<td><span class="badge '+(status==='قبول'?'b-green':'b-red')+'">'+status+'</span></td></tr>';
+  }).join('') || '<tr><td colspan="12" style="text-align:center;color:#718096">داده‌ای یافت نشد</td></tr>';
+
+  // session bar
+  var types = ['normal','normal','game','normal','film','exam','game','normal','film','normal','normal','exam'];
+  var colors = {normal:'#c6f6d5',game:'#bee3f8',film:'#fefcbf',exam:'#fed7d7'};
+  var labels = {normal:'عادی',game:'بازی',film:'📹',exam:'آزمون'};
+  document.getElementById('session-bar').innerHTML = types.map(function(t,i){
+    return '<div class="session-cell" style="background:'+colors[t]+';color:#2d3748">'+(i+1)+'<br><span style="font-size:9px">'+labels[t]+'</span></div>';
+  }).join('');
+
+  document.getElementById('exams-loading').style.display = 'none';
+  document.getElementById('exams-content').style.display = 'block';
+}
+
+// ══ ATTENDANCE ══
+function renderAttendance() {
+  var list = byBranch(DATA.attendance, 'شعبه');
+  var present = list.filter(function(a){ return a['حضور']==='حاضر'; }).length;
+  var attRate = list.length ? Math.round(present/list.length*100) : 0;
+  document.getElementById('att-metrics').innerHTML = [
+    {label:'کل جلسات', value: list.length, sub:''},
+    {label:'حاضر', value: present, sub: attRate+'٪'},
+    {label:'غایب', value: list.length-present, sub:''},
+  ].map(function(m){
+    return '<div class="metric"><div class="metric-label">'+m.label+'</div><div class="metric-value">'+m.value+'</div><div class="metric-sub">'+m.sub+'</div></div>';
+  }).join('');
+
+  document.getElementById('att-tbody').innerHTML = list.map(function(a){
+    var present = a['حضور']==='حاضر';
+    return '<tr><td>'+a['تاریخ']+'</td><td>'+a['نام هنرجو']+'</td><td>'+a['شعبه']+'</td>'+
+      '<td>'+a['ترم']+'</td><td>'+a['شماره جلسه']+'</td><td>'+a['نوع جلسه']+'</td>'+
+      '<td><span class="badge '+(present?'b-green':'b-red')+'">'+(a['حضور']||'—')+'</span></td>'+
+      '<td>'+a['مربی']+'</td><td style="font-size:11px;color:#718096">'+a['یادداشت']+'</td></tr>';
+  }).join('') || '<tr><td colspan="9" style="text-align:center;color:#718096">داده‌ای یافت نشد</td></tr>';
+
+  document.getElementById('attendance-loading').style.display = 'none';
+  document.getElementById('attendance-content').style.display = 'block';
+}
+
+// ══ TERMS ══
+function renderTerms() {
+  var terms = [
+    {name:'ترم بهار',    start:'۲۰ فروردین', end:'۲۵ خرداد',  holiday:'۱–۵ خرداد',    status:'جاری',       color:'#38a169'},
+    {name:'ترم تابستان', start:'۱۰ تیر',     end:'۱۵ شهریور', holiday:'۱–۱۰ مرداد',   status:'آینده',      color:'#3182ce'},
+    {name:'ترم پاییز',   start:'۱ مهر',      end:'۵ آذر',     holiday:'۲۰–۲۵ آبان',   status:'آینده',      color:'#3182ce'},
+    {name:'ترم زمستان',  start:'۱۵ دی',      end:'۲۰ اسفند',  holiday:'۲۵–۳۰ بهمن',  status:'برنامه‌ریزی', color:'#a0aec0'},
+  ];
+  var statusBadge = {جاری:'b-green',آینده:'b-blue','برنامه‌ریزی':'b-gray'};
+  document.getElementById('term-list').innerHTML = terms.map(function(t){
+    return '<div class="term-row"><div class="term-dot" style="background:'+t.color+'"></div>'+
+      '<b style="font-size:13px;flex:1">'+t.name+'</b>'+
+      '<span style="font-size:12px;color:#718096">📅 '+t.start+' – '+t.end+' &nbsp;|&nbsp; 🏖 تعطیلات: '+t.holiday+'</span>'+
+      '<span class="badge '+statusBadge[t.status]+'">'+t.status+'</span></div>';
+  }).join('');
+}
+
+// ══ BRANCHES ══
+function renderBranches() {
+  var branches = [
+    {name:'بابل',     city:'مازندران',         students: DATA.students.filter(function(s){return s['شعبه']==='بابل';}).length,    courts:3,coaches:4},
+    {name:'ساری',     city:'مازندران',         students: DATA.students.filter(function(s){return s['شعبه']==='ساری';}).length,    courts:3,coaches:3},
+    {name:'تهران',    city:'تهران',             students: DATA.students.filter(function(s){return s['شعبه']==='تهران';}).length,   courts:4,coaches:5},
+    {name:'قائمشهر', city:'مازندران',          students: DATA.students.filter(function(s){return s['شعبه']==='قائمشهر';}).length, courts:2,coaches:2},
+    {name:'نوشهر',   city:'مازندران',          students: DATA.students.filter(function(s){return s['شعبه']==='نوشهر';}).length,   courts:2,coaches:2},
+    {name:'سمنان',   city:'سمنان',             students: DATA.students.filter(function(s){return s['شعبه']==='سمنان';}).length,   courts:2,coaches:2},
+    {name:'تبریز',   city:'آذربایجان شرقی',   students: DATA.students.filter(function(s){return s['شعبه']==='تبریز';}).length,   courts:2,coaches:2},
+  ];
+  document.getElementById('branch-cards').innerHTML = branches.map(function(b){
+    return '<div class="branch-card"><div class="branch-name">'+b.name+'</div>'+
+      '<div class="branch-stat">📍 '+b.city+'</div>'+
+      '<div class="branch-stat">👥 '+b.students+' هنرجو</div>'+
+      '<div class="branch-stat">🎾 '+b.courts+' زمین | 🎓 '+b.coaches+' مربی</div></div>';
+  }).join('');
+}
+
+// ══ CHARTER ══
+function renderCharter() {
+  var rules = [
+    {icon:'⏱',title:'مدت جلسه',       text:'هر جلسه دقیقاً ۶۰ دقیقه — شروع و پایان منظم'},
+    {icon:'🚫',title:'عدم دخالت والدین',text:'والدین در حین کلاس حق ورود به زمین ندارند'},
+    {icon:'🎮',title:'جلسه بازی',      text:'هر ۳ جلسه یک جلسه کامل بازی واقعی'},
+    {icon:'📹',title:'فیلمبرداری',     text:'جلسه ۵ و ۱۰ هر ترم ضبط تصویری می‌شود'},
+    {icon:'🛡',title:'بیمه ورزشی',     text:'ثبت‌نام بدون بیمه معتبر پذیرفته نمی‌شود'},
+    {icon:'👕',title:'لباس فرم',        text:'استفاده از لباس فرم آکادمی الزامی است'},
+    {icon:'🤝',title:'رفتار محترمانه', text:'احترام به مربی و هنرجویان — اخراج در صورت تخلف'},
+    {icon:'📅',title:'غیبت مجاز',      text:'حداکثر ۲ غیبت موجه — بیشتر → عدم شرکت در آزمون'},
+  ];
+  document.getElementById('charter-grid').innerHTML = rules.map(function(r){
+    return '<div class="charter-item"><div class="charter-icon">'+r.icon+'</div>'+
+      '<div><div class="charter-title">'+r.title+'</div><div class="charter-text">'+r.text+'</div></div></div>';
+  }).join('');
+}
+
+// ── START ──
+loadAll();
+</script>
+</body>
+</html>

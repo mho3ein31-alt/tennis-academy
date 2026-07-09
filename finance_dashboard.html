@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سیستم مالی آکادمی تنیس</title>
+<style>
+/* ═══════════════════════════════
+   TOKENS
+═══════════════════════════════ */
+:root {
+  --ink:       #1a1f2e;
+  --ink-2:     #3d4557;
+  --ink-3:     #6b7590;
+  --border:    #e4e8f0;
+  --border-2:  #c8cfe0;
+  --surface:   #f7f9fc;
+  --white:     #ffffff;
+
+  --green:     #16a34a;
+  --green-bg:  #dcfce7;
+  --red:       #dc2626;
+  --red-bg:    #fee2e2;
+  --amber:     #d97706;
+  --amber-bg:  #fef3c7;
+  --blue:      #1d4ed8;
+  --blue-bg:   #dbeafe;
+  --purple:    #7c3aed;
+  --purple-bg: #ede9fe;
+
+  --accent:    #0f4c81;
+  --accent-2:  #1a6eb5;
+  --accent-bg: #e8f1fb;
+
+  --r:  10px;
+  --r2: 6px;
+  --shadow: 0 1px 4px rgba(0,0,0,.07);
+  --shadow-2: 0 4px 16px rgba(0,0,0,.10);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Tahoma, 'Segoe UI', sans-serif; background: var(--surface); color: var(--ink); direction: rtl; font-size: 14px; }
+input, select, textarea, button { font-family: inherit; font-size: 13px; }
+
+/* ── LAYOUT ── */
+.app { display: flex; height: 100vh; overflow: hidden; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 220px; flex-shrink: 0;
+  background: var(--accent);
+  display: flex; flex-direction: column;
+  padding: 0;
+  overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+}
+.sidebar-logo-title { font-size: 15px; font-weight: bold; color: #fff; }
+.sidebar-logo-sub   { font-size: 11px; color: rgba(255,255,255,.6); margin-top: 2px; }
+
+.sidebar-section { padding: 14px 10px 4px; font-size: 10px; color: rgba(255,255,255,.45); letter-spacing: .08em; text-transform: uppercase; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; margin: 1px 8px;
+  border-radius: var(--r2); cursor: pointer;
+  color: rgba(255,255,255,.75); font-size: 13px;
+  transition: all .15s;
+}
+.nav-item:hover { background: rgba(255,255,255,.1); color: #fff; }
+.nav-item.active { background: rgba(255,255,255,.18); color: #fff; font-weight: bold; }
+.nav-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+.nav-badge {
+  margin-right: auto; background: var(--red);
+  color: #fff; font-size: 10px; padding: 1px 6px;
+  border-radius: 10px; font-weight: bold;
+}
+
+/* MAIN */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+.topbar {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 0 24px; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.topbar-title { font-size: 16px; font-weight: bold; color: var(--ink); }
+.topbar-actions { display: flex; gap: 10px; align-items: center; }
+
+.content { flex: 1; overflow-y: auto; padding: 22px 24px; }
+
+/* ── PANELS ── */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ── METRICS ROW ── */
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px,1fr)); gap: 14px; margin-bottom: 22px; }
+.metric {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 16px 18px;
+  box-shadow: var(--shadow);
+}
+.metric-label { font-size: 12px; color: var(--ink-3); margin-bottom: 6px; }
+.metric-value { font-size: 26px; font-weight: bold; color: var(--ink); line-height: 1; }
+.metric-sub { font-size: 11px; color: var(--ink-3); margin-top: 5px; }
+.metric-up   { color: var(--green); }
+.metric-down { color: var(--red); }
+.metric-accent { border-right: 3px solid var(--accent); }
+.metric-green  { border-right: 3px solid var(--green); }
+.metric-red    { border-right: 3px solid var(--red); }
+.metric-amber  { border-right: 3px solid var(--amber); }
+
+/* ── CARD ── */
+.card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 20px;
+  box-shadow: var(--shadow); margin-bottom: 18px;
+}
+.card-title {
+  font-size: 14px; font-weight: bold; color: var(--ink);
+  margin-bottom: 14px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-title-icon { font-size: 16px; margin-left: 6px; }
+
+/* ── GRID ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+@media (max-width: 700px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+/* ── TABLE ── */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  text-align: right; padding: 9px 12px;
+  font-size: 11px; font-weight: bold; color: var(--ink-3);
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+td {
+  padding: 10px 12px; border-bottom: 1px solid var(--border);
+  color: var(--ink); vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fafbfd; }
+
+/* ── BADGE ── */
+.badge { display: inline-block; padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+.b-green  { background: var(--green-bg);  color: var(--green); }
+.b-red    { background: var(--red-bg);    color: var(--red); }
+.b-amber  { background: var(--amber-bg);  color: var(--amber); }
+.b-blue   { background: var(--blue-bg);   color: var(--blue); }
+.b-purple { background: var(--purple-bg); color: var(--purple); }
+.b-gray   { background: var(--surface);   color: var(--ink-3); border: 1px solid var(--border); }
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 8px 16px; border-radius: var(--r2); font-size: 13px;
+  cursor: pointer; border: none; transition: all .15s; display: inline-flex;
+  align-items: center; gap: 6px;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-2); }
+.btn-ghost { background: transparent; color: var(--ink-2); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--surface); }
+.btn-sm { padding: 5px 11px; font-size: 12px; }
+.btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-bg); }
+
+/* ── FORM ── */
+.form-row { display: grid; gap: 12px; margin-bottom: 12px; }
+.form-row-2 { grid-template-columns: 1fr 1fr; }
+.form-row-3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-group label { display: block; font-size: 12px; color: var(--ink-3); margin-bottom: 5px; font-weight: bold; }
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%; padding: 8px 11px;
+  border: 1px solid var(--border-2); border-radius: var(--r2);
+  font-size: 13px; color: var(--ink);
+  background: var(--white); transition: border .15s;
+}
+.form-group input:focus,
+.form-group select:focus { outline: none; border-color: var(--accent); }
+.form-group textarea { min-height: 70px; resize: vertical; }
+
+/* ── CHART BAR (pure CSS) ── */
+.chart-bar-wrap { display: flex; flex-direction: column; gap: 10px; }
+.chart-bar-row { display: flex; align-items: center; gap: 10px; }
+.chart-bar-label { font-size: 12px; color: var(--ink-2); width: 80px; flex-shrink: 0; text-align: right; }
+.chart-bar-bg { flex: 1; height: 24px; background: var(--surface); border-radius: 4px; overflow: hidden; position: relative; }
+.chart-bar-fill { height: 100%; border-radius: 4px; transition: width .6s; display: flex; align-items: center; padding-right: 8px; }
+.chart-bar-val { font-size: 11px; font-weight: bold; color: #fff; }
+.chart-bar-num { font-size: 12px; color: var(--ink-3); width: 80px; flex-shrink: 0; text-align: left; }
+
+/* ── PROGRESS ── */
+.progress-wrap { height: 8px; background: var(--surface); border-radius: 4px; overflow: hidden; margin-top: 4px; }
+.progress-fill { height: 100%; border-radius: 4px; transition: width .5s; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45);
+  display: none; align-items: center; justify-content: center;
+  z-index: 1000; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--white); border-radius: var(--r);
+  width: 100%; max-width: 560px; max-height: 90vh;
+  overflow-y: auto; box-shadow: var(--shadow-2);
+}
+.modal-header {
+  padding: 18px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 15px; font-weight: bold;
+}
+.modal-body { padding: 20px; }
+.modal-footer {
+  padding: 14px 20px; border-top: 1px solid var(--border);
+  display: flex; gap: 10px; justify-content: flex-end;
+}
+.close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--ink-3); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: #fff; padding: 11px 22px;
+  border-radius: var(--r); font-size: 13px; z-index: 2000;
+  box-shadow: var(--shadow-2); opacity: 0;
+  transition: opacity .3s; pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* ── STAT RING (fake donut) ── */
+.donut-wrap { display: flex; align-items: center; gap: 16px; }
+.donut-legend { display: flex; flex-direction: column; gap: 8px; }
+.donut-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.donut-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── DEBT TABLE highlight ── */
+.debt-critical td { background: #fff5f5 !important; }
+.debt-warn td     { background: #fffbeb !important; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 3px; }
+
+/* ── INLINE CHART ── */
+.mini-bars { display: flex; align-items: flex-end; gap: 3px; height: 48px; }
+.mini-bar { flex: 1; border-radius: 2px 2px 0 0; min-width: 10px; transition: height .4s; cursor: default; position: relative; }
+.mini-bar:hover::after {
+  content: attr(data-tip);
+  position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: #fff; font-size: 10px;
+  padding: 2px 6px; border-radius: 3px; white-space: nowrap; pointer-events: none;
+}
+
+/* ── COACH PERF ── */
+.coach-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.coach-row:last-child { border-bottom: none; }
+.coach-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--accent-bg); color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: bold; font-size: 14px; flex-shrink: 0;
+}
+.coach-name  { font-size: 13px; font-weight: bold; flex: 1; }
+.coach-stat  { font-size: 12px; color: var(--ink-3); }
+.coach-earn  { font-size: 13px; font-weight: bold; color: var(--green); width: 90px; text-align: left; }
+
+/* ── TABS inside card ── */
+.inner-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+.inner-tab {
+  padding: 7px 14px; font-size: 12px; cursor: pointer;
+  color: var(--ink-3); border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.inner-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: bold; }
+
+/* ── LOADING ── */
+.loading-state { text-align: center; padding: 30px; color: var(--ink-3); font-size: 13px; }
+.spinner {
+  display: inline-block; width: 24px; height: 24px;
+  border: 3px solid var(--border); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin .7s linear infinite; margin-bottom: 8px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .form-row-2, .form-row-3 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-title">🎾 آکادمی تنیس</div>
+    <div class="sidebar-logo-sub">سیستم مدیریت مالی</div>
+  </div>
+
+  <div class="sidebar-section">داشبورد</div>
+  <div class="nav-item active" onclick="goto('dashboard',this)"><span class="nav-icon">📊</span> نمای کلی</div>
+
+  <div class="sidebar-section">درآمد</div>
+  <div class="nav-item" onclick="goto('income-private',this)"><span class="nav-icon">🎾</span> کلاس خصوصی</div>
+  <div class="nav-item" onclick="goto('income-court',this)"><span class="nav-icon">🏟</span> اجاره زمین</div>
+  <div class="nav-item" onclick="goto('income-shop',this)"><span class="nav-icon">🛒</span> فروش تجهیزات</div>
+
+  <div class="sidebar-section">هزینه</div>
+  <div class="nav-item" onclick="goto('expense-coaches',this)"><span class="nav-icon">👨‍🏫</span> حقوق مربیان</div>
+  <div class="nav-item" onclick="goto('expense-rent',this)"><span class="nav-icon">🏢</span> اجاره زمین‌ها</div>
+  <div class="nav-item" onclick="goto('expense-ops',this)"><span class="nav-icon">🔧</span> عملیاتی</div>
+
+  <div class="sidebar-section">گزارش</div>
+  <div class="nav-item" onclick="goto('report-pl',this)"><span class="nav-icon">📈</span> سود و زیان</div>
+  <div class="nav-item" onclick="goto('report-debt',this)">
+    <span class="nav-icon">⚠️</span> بدهکاران
+    <span class="nav-badge" id="debt-count">۰</span>
+  </div>
+  <div class="nav-item" onclick="goto('report-branch',this)"><span class="nav-icon">🏙</span> مقایسه شعبات</div>
+  <div class="nav-item" onclick="goto('report-coach',this)"><span class="nav-icon">🏆</span> عملکرد مربیان</div>
+  <div class="nav-item" onclick="goto('report-forecast',this)"><span class="nav-icon">🔮</span> پیش‌بینی</div>
+</div>
+
+<!-- ══════════ MAIN ══════════ -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">📊 نمای کلی مالی</div>
+    <div class="topbar-actions">
+      <span id="sync-label" style="font-size:12px;color:var(--ink-3)">⏳ در حال بارگذاری...</span>
+      <button class="btn btn-ghost btn-sm" onclick="loadAll()">🔄 بروزرسانی</button>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-tx')">+ ثبت تراکنش</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ════ DASHBOARD ════ -->
+    <div id="panel-dashboard" class="panel active">
+      <div class="metrics" id="dash-metrics"></div>
+      <div class="grid-2">
+
+        <!-- درآمد ماهانه -->
+        <div class="card">
+          <div class="card-title">
+            <span><span class="card-title-icon">📅</span> درآمد ۶ ماه اخیر</span>
+          </div>
+          <div class="mini-bars" id="monthly-chart"></div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--ink-3);margin-top:4px" id="monthly-labels"></div>
+        </div>
+
+        <!-- ترکیب درآمد -->
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">🥧</span> ترکیب منابع درآمد</div>
+          <div class="chart-bar-wrap" id="income-mix-chart"></div>
+        </div>
+
+      </div>
+      <div class="grid-2">
+        <!-- هزینه‌ها -->
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">💸</span> ترکیب هزینه‌ها</div>
+          <div class="chart-bar-wrap" id="expense-mix-chart"></div>
+        </div>
+
+        <!-- شعبات -->
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">🏙</span> سود خالص هر شعبه</div>
+          <div class="chart-bar-wrap" id="branch-profit-chart"></div>
+        </div>
+      </div>
+
+      <!-- تراکنش‌های اخیر -->
+      <div class="card">
+        <div class="card-title">
+          <span><span class="card-title-icon">🕐</span> آخرین تراکنش‌ها</span>
+          <button class="btn btn-ghost btn-sm" onclick="goto('report-pl',document.querySelector('.nav-item'))">مشاهده همه</button>
+        </div>
+        <div class="tbl-wrap">
+          <table id="recent-tx-table">
+            <thead><tr><th>تاریخ</th><th>توضیح</th><th>نوع</th><th>شعبه</th><th>مبلغ</th><th>وضعیت</th></tr></thead>
+            <tbody id="recent-tx-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ INCOME PRIVATE ════ -->
+    <div id="panel-income-private" class="panel">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🎾</span> ثبت کلاس خصوصی</div>
+        <div class="form-row form-row-3">
+          <div class="form-group"><label>نام هنرجو</label><input id="p-student" type="text" placeholder="نام کامل"></div>
+          <div class="form-group"><label>مربی</label><select id="p-coach"><option>محمد صابرقدیم</option><option>ارمین دارایی</option><option>شهبد والهی</option><option>تینا صابرقدیم</option></select></div>
+          <div class="form-group"><label>شعبه</label><select id="p-branch"><option>بابل</option><option>ساری</option><option>تهران</option><option>قائمشهر</option><option>نوشهر</option><option>سمنان</option><option>تبریز</option></select></div>
+        </div>
+        <div class="form-row form-row-3">
+          <div class="form-group"><label>تعداد جلسات</label><input id="p-sessions" type="number" value="1" min="1" oninput="calcPrivate()"></div>
+          <div class="form-group"><label>نرخ هر جلسه (تومان)</label><input id="p-rate" type="number" value="700000" oninput="calcPrivate()"></div>
+          <div class="form-group"><label>تاریخ</label><input id="p-date" type="text" placeholder="۱۴۰۴/۰۲/۱۵"></div>
+        </div>
+        <div class="form-row form-row-3">
+          <div class="form-group"><label>روش پرداخت</label><select id="p-pay"><option>کارت</option><option>نقد</option><option>انتقال</option></select></div>
+          <div class="form-group"><label>وضعیت</label><select id="p-status"><option>پرداخت شده</option><option>معوق</option></select></div>
+          <div class="form-group">
+            <label>مبلغ کل</label>
+            <div style="padding:8px 11px;background:var(--green-bg);border-radius:var(--r2);font-weight:bold;color:var(--green);font-size:15px" id="p-total">۷۰۰٬۰۰۰ تومان</div>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px"><label>یادداشت</label><textarea id="p-note" placeholder="توضیحات اضافی..."></textarea></div>
+        <button class="btn btn-primary" onclick="submitIncome('private')">✅ ثبت در Google Sheets</button>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">📋</span> سوابق کلاس خصوصی</div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>تاریخ</th><th>هنرجو</th><th>مربی</th><th>شعبه</th><th>جلسات</th><th>مبلغ</th><th>پرداخت</th><th>وضعیت</th></tr></thead>
+          <tbody id="private-tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ════ INCOME COURT ════ -->
+    <div id="panel-income-court" class="panel">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🏟</span> ثبت اجاره زمین (سانس آزاد)</div>
+        <div class="form-row form-row-3">
+          <div class="form-group"><label>نام مستاجر</label><input id="c-name" type="text" placeholder="نام شخص یا گروه"></div>
+          <div class="form-group"><label>شعبه / زمین</label><select id="c-branch"><option>قاِمشهر— زمین ۱</option><option>بابل — زمین ۲</option><option>ساری — زمین ۱</option><option>تهران — زمین ۱</option><option>تهران — زمین ۲</option></select></div>
+          <div class="form-group"><label>تاریخ</label><input id="c-date" type="text" placeholder="۱۴۰۴/۰۲/۱۵"></div>
+        </div>
+        <div class="form-row form-row-3">
+          <div class="form-group"><label>ساعت شروع</label><input id="c-start" type="text" placeholder="۱۶:۰۰"></div>
+          <div class="form-group"><label>مدت (ساعت)</label><input id="c-dur" type="number" value="1" min="1" max="4" oninput="calcCourt()"></div>
+          <div class="form-group"><label>نرخ ساعتی (تومان)</label><input id="c-rate" type="number" value="500000" oninput="calcCourt()"></div>
+        </div>
+        <div class="form-row form-row-3">
+          <div class="form-group"><label>روش پرداخت</label><select id="c-pay"><option>کارت</option><option>نقد</option><option>انتقال</option></select></div>
+          <div class="form-group"><label>وضعیت</label><select id="c-status"><option>پرداخت شده</option><option>معوق</option></select></div>
+          <div class="form-group">
+            <label>مبلغ کل</label>
+            <div style="padding:8px 11px;background:var(--blue-bg);border-radius:var(--r2);font-weight:bold;color:var(--blue);font-size:15px" id="c-total">۵۰۰٬۰۰۰ تومان</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="submitIncome('court')">✅ ثبت در Google Sheets</button>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">📋</span> سوابق اجاره زمین</div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>تاریخ</th><th>مستاجر</th><th>زمین</th><th>مدت</th><th>مبلغ</th><th>وضعیت</th></tr></thead>
+          <tbody id="court-tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ════ INCOME SHOP ════ -->
+    <div id="panel-income-shop" class="panel">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🛒</span> ثبت فروش تجهیزات</div>
+        <div class="form-row form-row-3">
+          <div class="form-group"><label>نوع کالا</label><select id="sh-type"><option>راکت</option><option>توپ (بسته)</option><option>کفش</option><option>کیف</option><option>لباس</option><option>سایر</option></select></div>
+          <div class="form-group"><label>برند / مدل</label><input id="sh-brand" type="text" placeholder="مثال: Wilson Pro Staff"></div>
+          <div class="form-group"><label>خریدار</label><input id="sh-buyer" type="text" placeholder="نام خریدار"></div>
+        </div>
+        <div class="form-row form-row-3">
+          <div class="form-group"><label>تعداد</label><input id="sh-qty" type="number" value="1" min="1" oninput="calcShop()"></div>
+          <div class="form-group"><label>قیمت واحد (تومان)</label><input id="sh-price" type="number" value="0" oninput="calcShop()"></div>
+          <div class="form-group"><label>قیمت خرید واحد (بهای تمام شده)</label><input id="sh-cost" type="number" value="0" oninput="calcShop()"></div>
+        </div>
+        <div class="form-row form-row-3">
+          <div class="form-group"><label>شعبه</label><select id="sh-branch"><option>بابل</option><option>ساری</option><option>تهران</option><option>قائمشهر</option></select></div>
+          <div class="form-group"><label>تاریخ</label><input id="sh-date" type="text" placeholder="۱۴۰۴/۰۲/۱۵"></div>
+          <div class="form-group">
+            <label>سود فروش</label>
+            <div style="padding:8px 11px;background:var(--purple-bg);border-radius:var(--r2);font-weight:bold;color:var(--purple);font-size:15px" id="sh-profit">۰ تومان</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="submitIncome('shop')">✅ ثبت در Google Sheets</button>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 سوابق فروش</div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>تاریخ</th><th>کالا</th><th>تعداد</th><th>فروش</th><th>بهای تمام‌شده</th><th>سود</th><th>شعبه</th></tr></thead>
+          <tbody id="shop-tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ════ EXPENSE COACHES ════ -->
+    <div id="panel-expense-coaches" class="panel">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">👨‍🏫</span> ثبت حقوق مربی</div>
+        <div class="form-row form-row-3">
+          <div class="form-group"><label>نام مربی</label><select id="ec-coach"><option>محمد صابرقدیم</option><option>تینا صابرقدیم</option><option>ارمین دارایی</option><option>نیلوفر حسینی</option><option>کامران فتحی</option></select></div>
+          <div class="form-group"><label>ماه پرداخت</label><input id="ec-month" type="text" placeholder="اردیبهشت ۱۴۰۴"></div>
+          <div class="form-group"><label>شعبه</label><select id="ec-branch"><option>بابل</option><option>ساری</option><option>تهران</option><option>قائمشهر</option></select></div>
+        </div>
+        <div class="form-row form-row-3">
+          <div class="form-group"><label>تعداد جلسات گروهی</label><input id="ec-group" type="number" value="0" oninput="calcCoach()"></div>
+          <div class="form-group"><label>نرخ جلسه گروهی (تومان)</label><input id="ec-grate" type="number" value="400000" oninput="calcCoach()"></div>
+          <div class="form-group"><label>تعداد جلسات خصوصی</label><input id="ec-private" type="number" value="0" oninput="calcCoach()"></div>
+        </div>
+        <div class="form-row form-row-3">
+          <div class="form-group"><label>نرخ جلسه خصوصی (تومان)</label><input id="ec-prate" type="number" value="350000" oninput="calcCoach()"></div>
+          <div class="form-group"><label>پاداش (تومان)</label><input id="ec-bonus" type="number" value="0" oninput="calcCoach()"></div>
+          <div class="form-group">
+            <label>جمع حقوق</label>
+            <div style="padding:8px 11px;background:var(--amber-bg);border-radius:var(--r2);font-weight:bold;color:var(--amber);font-size:15px" id="ec-total">۰ تومان</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="submitExpense('coach')">✅ ثبت در Google Sheets</button>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 سوابق پرداخت حقوق</div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>ماه</th><th>مربی</th><th>شعبه</th><th>گروهی</th><th>خصوصی</th><th>پاداش</th><th>جمع</th><th>وضعیت</th></tr></thead>
+          <tbody id="coach-pay-tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ════ EXPENSE RENT ════ -->
+    <div id="panel-expense-rent" class="panel">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🏢</span> ثبت اجاره زمین (هزینه)</div>
+        <div class="form-row form-row-3">
+          <div class="form-group"><label>شعبه</label><select id="er-branch"><option>بابل</option><option>ساری</option><option>تهران</option><option>قائمشهر</option><option>نوشهر</option><option>سمنان</option><option>تبریز</option></select></div>
+          <div class="form-group"><label>ماه</label><input id="er-month" type="text" placeholder="اردیبهشت ۱۴۰۴"></div>
+          <div class="form-group"><label>مبلغ (تومان)</label><input id="er-amount" type="number" placeholder="۰"></div>
+        </div>
+        <div class="form-row form-row-2">
+          <div class="form-group"><label>تاریخ پرداخت</label><input id="er-date" type="text" placeholder="۱۴۰۴/۰۲/۰۱"></div>
+          <div class="form-group"><label>یادداشت</label><input id="er-note" type="text" placeholder="مثال: اجاره ماهانه زمین شماره ۲"></div>
+        </div>
+        <button class="btn btn-primary" onclick="submitExpense('rent')">✅ ثبت در Google Sheets</button>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 سوابق اجاره زمین‌ها</div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>ماه</th><th>شعبه</th><th>مبلغ</th><th>تاریخ پرداخت</th><th>یادداشت</th></tr></thead>
+          <tbody id="rent-tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ════ EXPENSE OPS ════ -->
+    <div id="panel-expense-ops" class="panel">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🔧</span> ثبت هزینه عملیاتی</div>
+        <div class="form-row form-row-3">
+          <div class="form-group"><label>دسته‌بندی</label>
+            <select id="op-cat">
+              <option>تجهیزات و نگهداری</option>
+              <option>بازاریابی و تبلیغات</option>
+              <option>برق، آب، گاز</option>
+              <option>بیمه</option>
+              <option>حمل‌ونقل</option>
+              <option>سایر</option>
+            </select>
+          </div>
+          <div class="form-group"><label>توضیح</label><input id="op-desc" type="text" placeholder="شرح هزینه"></div>
+          <div class="form-group"><label>شعبه</label><select id="op-branch"><option>مرکزی (همه)</option><option>بابل</option><option>ساری</option><option>تهران</option><option>قائمشهر</option></select></div>
+        </div>
+        <div class="form-row form-row-3">
+          <div class="form-group"><label>مبلغ (تومان)</label><input id="op-amount" type="number" placeholder="۰"></div>
+          <div class="form-group"><label>تاریخ</label><input id="op-date" type="text" placeholder="۱۴۰۴/۰۲/۱۵"></div>
+          <div class="form-group"><label>روش پرداخت</label><select id="op-pay"><option>کارت</option><option>نقد</option><option>انتقال</option><option>چک</option></select></div>
+        </div>
+        <button class="btn btn-primary" onclick="submitExpense('ops')">✅ ثبت در Google Sheets</button>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 هزینه‌های عملیاتی</div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>تاریخ</th><th>دسته</th><th>توضیح</th><th>شعبه</th><th>مبلغ</th><th>روش</th></tr></thead>
+          <tbody id="ops-tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ════ REPORT P&L ════ -->
+    <div id="panel-report-pl" class="panel">
+      <div class="metrics" id="pl-metrics"></div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">📈</span> صورت سود و زیان</div>
+        <div class="inner-tabs">
+          <div class="inner-tab active" onclick="plTab('monthly',this)">ماهانه</div>
+          <div class="inner-tab" onclick="plTab('term',this)">ترمی</div>
+          <div class="inner-tab" onclick="plTab('yearly',this)">سالانه</div>
+        </div>
+        <div class="tbl-wrap">
+          <table id="pl-table">
+            <thead><tr><th>دوره</th><th>درآمد کل</th><th>هزینه کل</th><th>سود خالص</th><th>حاشیه سود</th><th>وضعیت</th></tr></thead>
+            <tbody id="pl-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ REPORT DEBT ════ -->
+    <div id="panel-report-debt" class="panel">
+      <div class="metrics" id="debt-metrics"></div>
+      <div class="card">
+        <div class="card-title">
+          <span><span class="card-title-icon">⚠️</span> لیست بدهکاران (شهریه معوق)</span>
+          <button class="btn btn-ghost btn-sm" onclick="exportDebts()">📤 خروجی Excel</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>نام</th><th>شعبه</th><th>مبلغ بدهی</th><th>تعداد روز تأخیر</th><th>ترم</th><th>موبایل</th><th>اولویت</th><th>عملیات</th></tr></thead>
+            <tbody id="debt-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ REPORT BRANCH ════ -->
+    <div id="panel-report-branch" class="panel">
+      <div class="metrics" id="branch-metrics"></div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🏙</span> مقایسه مالی شعبات</div>
+        <div class="tbl-wrap">
+          <table id="branch-table">
+            <thead><tr><th>شعبه</th><th>درآمد</th><th>هزینه</th><th>سود خالص</th><th>حاشیه</th><th>هنرجو</th><th>درآمد/هنرجو</th><th>رتبه</th></tr></thead>
+            <tbody id="branch-tbody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:16px">
+          <div class="chart-bar-wrap" id="branch-compare-chart"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ REPORT COACH ════ -->
+    <div id="panel-report-coach" class="panel">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🏆</span> عملکرد مالی مربیان</div>
+        <div id="coach-rows"></div>
+      </div>
+    </div>
+
+    <!-- ════ REPORT FORECAST ════ -->
+    <div id="panel-report-forecast" class="panel">
+      <div class="metrics" id="forecast-metrics"></div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🔮</span> پیش‌بینی درآمد ترم آینده</div>
+        <div class="grid-2">
+          <div>
+            <div style="font-size:13px;color:var(--ink-3);margin-bottom:12px">بر اساس میانگین ۳ ترم گذشته + نرخ رشد تاریخی</div>
+            <div class="chart-bar-wrap" id="forecast-chart"></div>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:bold;margin-bottom:12px">فرضیه‌های پیش‌بینی</div>
+            <div id="forecast-assumptions" style="font-size:13px;color:var(--ink-2);line-height:2.2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══════════ MODAL: ثبت سریع تراکنش ══════════ -->
+<div class="modal-overlay" id="modal-tx">
+  <div class="modal">
+    <div class="modal-header">
+      ⚡ ثبت سریع تراکنش
+      <button class="close-btn" onclick="closeModal('modal-tx')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>نوع</label>
+          <select id="tx-type">
+            <option value="income">درآمد</option>
+            <option value="expense">هزینه</option>
+          </select>
+        </div>
+        <div class="form-group"><label>دسته‌بندی</label>
+          <select id="tx-cat">
+            <option>کلاس خصوصی</option><option>اجاره زمین</option>
+            <option>فروش تجهیزات</option><option>حقوق مربی</option>
+            <option>اجاره ماهانه</option><option>تجهیزات</option>
+            <option>بازاریابی</option><option>سایر</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>مبلغ (تومان)</label><input id="tx-amount" type="number" placeholder="۰"></div>
+        <div class="form-group"><label>تاریخ</label><input id="tx-date" type="text" placeholder="۱۴۰۴/۰۲/۱۵"></div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>شعبه</label>
+          <select id="tx-branch">
+            <option>بابل</option><option>ساری</option><option>تهران</option>
+            <option>قائمشهر</option><option>نوشهر</option><option>سمنان</option><option>تبریز</option>
+          </select>
+        </div>
+        <div class="form-group"><label>روش پرداخت</label>
+          <select id="tx-pay"><option>کارت</option><option>نقد</option><option>انتقال</option><option>چک</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label>توضیح</label><input id="tx-desc" type="text" placeholder="شرح مختصر"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-tx')">انصراف</button>
+      <button class="btn btn-primary" onclick="submitQuickTx()">✅ ثبت</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+// ⚠️  آدرس API شما — فقط این را عوض کنید
+// ══════════════════════════════════════
+var API = 'https://script.google.com/macros/s/AKfycbyLUrrflJQRbYbNacLbvUmii9bAkIR1FTGWpSfdCwmF_2mc6nh0gsBFMCMsGCexiS-zzA/exec';
+
+// ══════════════════════════════════════
+// LOCAL DATA STORE
+// ══════════════════════════════════════
+var STORE = {
+  income_private: [], income_court: [], income_shop: [],
+  expense_coach: [], expense_rent: [], expense_ops: [],
+  transactions: [],    students: [],    finance: []
+};
+
+// ══════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════
+var panelTitles = {
+  'dashboard':        '📊 نمای کلی مالی',
+  'income-private':   '🎾 کلاس‌های خصوصی',
+  'income-court':     '🏟 اجاره زمین (سانس آزاد)',
+  'income-shop':      '🛒 فروش تجهیزات',
+  'expense-coaches':  '👨‍🏫 حقوق مربیان',
+  'expense-rent':     '🏢 اجاره زمین‌ها',
+  'expense-ops':      '🔧 هزینه‌های عملیاتی',
+  'report-pl':        '📈 سود و زیان',
+  'report-debt':      '⚠️ بدهکاران',
+  'report-branch':    '🏙 مقایسه شعبات',
+  'report-coach':     '🏆 عملکرد مربیان',
+  'report-forecast':  '🔮 پیش‌بینی درآمد',
+};
+
+function goto(id, el) {
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  var panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('topbar-title').textContent = panelTitles[id] || '';
+  renderPanel(id);
+}
+
+function renderPanel(id) {
+  if (id === 'dashboard')        renderDashboard();
+  else if (id === 'report-pl')   renderPL();
+  else if (id === 'report-debt') renderDebt();
+  else if (id === 'report-branch') renderBranch();
+  else if (id === 'report-coach')  renderCoach();
+  else if (id === 'report-forecast') renderForecast();
+}
+
+// ══════════════════════════════════════
+// API
+// ══════════════════════════════════════
+function apiFetch(action) {
+  return fetch(API + '?action=' + action)
+    .then(function(r){ return r.json(); })
+    .then(function(j){ return j.success ? (j.data || []) : []; })
+    .catch(function(){ return []; });
+}
+
+function apiPost(payload) {
+  return fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    mode: 'no-cors'
+  }).then(function(){ return { success: true }; })
+    .catch(function(e){ return { success: false, error: e.message }; });
+}
+
+function loadAll() {
+  document.getElementById('sync-label').textContent = '⏳ در حال بروزرسانی...';
+  apiFetch('finance').then(function(d){
+    STORE.finance = d || [];
+    apiFetch('students').then(function(s){
+      STORE.students = s || [];
+      var now = new Date();
+      document.getElementById('sync-label').textContent =
+        '✅ آخرین بروزرسانی ' + now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
+      seedDemoData();
+      renderDashboard();
+      renderDebt();
+    });
+  });
+}
+
+// ══════════════════════════════════════
+// SEED DEMO DATA (اگر شیت خالی باشد)
+// ══════════════════════════════════════
+function seedDemoData() {
+  if (STORE.transactions.length > 0) return;
+  var months = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور'];
+  var branches = ['بابل','ساری','تهران','قائمشهر','نوشهر'];
+  var coaches  = ['محمد صابرقدیم','تینا صابرقدیم','ارمین دارایی','نیلوفر حسینی','کامران فتحی'];
+
+  months.forEach(function(m, mi) {
+    ['بابل','ساری','تهران','قائمشهر'].forEach(function(b) {
+      var baseInc = b==='تهران' ? 18000000 : b==='بابل'||b==='ساری' ? 13000000 : 8000000;
+      STORE.transactions.push({ date:'۱۴۰۴/'+String(mi+1).padStart(2,'0')+'/01', desc:'شهریه گروهی '+m, type:'income', cat:'شهریه گروهی', branch:b, amount: baseInc + Math.round(Math.random()*2000000), pay:'کارت', status:'پرداخت شده' });
+      STORE.transactions.push({ date:'۱۴۰۴/'+String(mi+1).padStart(2,'0')+'/15', desc:'حقوق مربیان '+m, type:'expense', cat:'حقوق مربیان', branch:b, amount: Math.round(baseInc*0.35), pay:'انتقال', status:'پرداخت شده' });
+      STORE.transactions.push({ date:'۱۴۰۴/'+String(mi+1).padStart(2,'0')+'/05', desc:'اجاره زمین '+m, type:'expense', cat:'اجاره ماهانه', branch:b, amount: b==='تهران' ? 9000000 : 4000000, pay:'چک', status:'پرداخت شده' });
+    });
+    STORE.transactions.push({ date:'۱۴۰۴/'+String(mi+1).padStart(2,'0')+'/10', desc:'کلاس خصوصی', type:'income', cat:'کلاس خصوصی', branch:'بابل', amount:2100000, pay:'کارت', status:'پرداخت شده' });
+    STORE.transactions.push({ date:'۱۴۰۴/'+String(mi+1).padStart(2,'0')+'/12', desc:'اجاره زمین آزاد', type:'income', cat:'اجاره زمین', branch:'ساری', amount:1500000, pay:'نقد', status:'پرداخت شده' });
+    STORE.transactions.push({ date:'۱۴۰۴/'+String(mi+1).padStart(2,'0')+'/20', desc:'فروش راکت Wilson', type:'income', cat:'فروش تجهیزات', branch:'تهران', amount:3200000, pay:'کارت', status:'پرداخت شده' });
+  });
+
+  STORE.income_private = [
+    { date:'۱۴۰۴/۰۲/۱۰', student:'رضا نوری', coach:'محمد صابرقدیم', branch:'بابل', sessions:3, amount:2100000, pay:'کارت', status:'پرداخت شده' },
+    { date:'۱۴۰۴/۰۲/۱۵', student:'مریم احمدی', coach:'تینا صابرقدیم', branch:'ساری', sessions:2, amount:1400000, pay:'نقد', status:'پرداخت شده' },
+    { date:'۱۴۰۴/۰۲/۱۸', student:'علی رضایی', coach:'آرمین دارایی', branch:'تهران', sessions:5, amount:3500000, pay:'کارت', status:'معوق' },
+  ];
+  STORE.income_court = [
+    { date:'۱۴۰۴/۰۲/۰۵', name:'تیم دوستانه', court:'بابل — زمین ۱', duration:2, amount:1000000, status:'پرداخت شده' },
+    { date:'۱۴۰۴/۰۲/۱۱', name:'سامان کریمی', court:'ساری — زمین ۱', duration:1, amount:500000, status:'پرداخت شده' },
+  ];
+  STORE.income_shop = [
+    { date:'۱۴۰۴/۰۱/۲۰', item:'راکت Wilson Pro', qty:2, price:3200000, cost:2100000, branch:'تهران' },
+    { date:'۱۴۰۴/۰۲/۰۳', item:'توپ Head (۳تایی)', qty:5, price:250000, cost:160000, branch:'بابل' },
+  ];
+  STORE.expense_coach = [
+    { month:'فروردین ۱۴۰۴', coach:'محمد صابرقدیم', branch:'بابل', group:12, private:4, bonus:500000, total:6700000, status:'پرداخت شده' },
+    { month:'فروردین ۱۴۰۴', coach:'تینا صابرقدیم',  branch:'ساری', group:10, private:2, bonus:0,      total:4700000, status:'پرداخت شده' },
+    { month:'اردیبهشت ۱۴۰۴', coach:'', branch:'تهران', group:14, private:6, bonus:800000, total:7300000, status:'در انتظار' },
+  ];
+  STORE.expense_rent = [
+    { month:'فروردین ۱۴۰۴', branch:'بابل', amount:4000000, date:'۱۴۰۴/۰۱/۰۳', note:'' },
+    { month:'فروردین ۱۴۰۴', branch:'ساری', amount:4000000, date:'۱۴۰۴/۰۱/۰۴', note:'' },
+    { month:'فروردین ۱۴۰۴', branch:'تهران', amount:9000000, date:'۱۴۰۴/۰۱/۰۵', note:'' },
+  ];
+  STORE.expense_ops = [
+    { date:'۱۴۰۴/۰۱/۱۵', cat:'تجهیزات و نگهداری', desc:'خرید توپ جدید (۲ سبد)', branch:'بابل', amount:1200000, pay:'نقد' },
+    { date:'۱۴۰۴/۰۲/۰۱', cat:'بازاریابی و تبلیغات', desc:'تبلیغ اینستاگرام', branch:'مرکزی (همه)', amount:800000, pay:'کارت' },
+  ];
+
+  // debt list
+  STORE.debtors = [
+    { name:'حسن محمدی', branch:'تهران', debt:6552000, days:32, term:'ترم ۱', phone:'09311234569' },
+    { name:'زهرا کریمی', branch:'قائمشهر', debt:3430000, days:18, term:'ترم ۲', phone:'09411234570' },
+    { name:'کامران امیری', branch:'بابل', debt:4320000, days:5, term:'ترم ۴', phone:'09501111111' },
+  ];
+
+  document.getElementById('debt-count').textContent = STORE.debtors.length;
+}
+
+// ══════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════
+function fmtM(n) {
+  n = parseFloat(n)||0;
+  if (n >= 1000000) return (n/1000000).toFixed(1) + ' م';
+  if (n >= 1000)    return Math.round(n/1000) + ' ه';
+  return n.toLocaleString();
+}
+function fmtN(n) { return (parseFloat(n)||0).toLocaleString(); }
+function statusBadge(s) {
+  var map = {'پرداخت شده':'b-green','معوق':'b-red','در انتظار':'b-amber','پرداخت نشده':'b-red'};
+  return '<span class="badge '+(map[s]||'b-gray')+'">'+s+'</span>';
+}
+function showToast(msg, ok) {
+  var t = document.getElementById('toast');
+  t.textContent = (ok!==false?'✅ ':'❌ ') + msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ══════════════════════════════════════
+// CALCULATORS
+// ══════════════════════════════════════
+function calcPrivate() {
+  var s = parseInt(document.getElementById('p-sessions').value)||0;
+  var r = parseInt(document.getElementById('p-rate').value)||0;
+  document.getElementById('p-total').textContent = fmtN(s*r) + ' تومان';
+}
+function calcCourt() {
+  var d = parseInt(document.getElementById('c-dur').value)||0;
+  var r = parseInt(document.getElementById('c-rate').value)||0;
+  document.getElementById('c-total').textContent = fmtN(d*r) + ' تومان';
+}
+function calcShop() {
+  var q = parseInt(document.getElementById('sh-qty').value)||0;
+  var p = parseInt(document.getElementById('sh-price').value)||0;
+  var c = parseInt(document.getElementById('sh-cost').value)||0;
+  document.getElementById('sh-profit').textContent = fmtN(q*(p-c)) + ' تومان';
+}
+function calcCoach() {
+  var g  = parseInt(document.getElementById('ec-group').value)||0;
+  var gr = parseInt(document.getElementById('ec-grate').value)||0;
+  var p  = parseInt(document.getElementById('ec-private').value)||0;
+  var pr = parseInt(document.getElementById('ec-prate').value)||0;
+  var b  = parseInt(document.getElementById('ec-bonus').value)||0;
+  document.getElementById('ec-total').textContent = fmtN(g*gr + p*pr + b) + ' تومان';
+}
+
+// ══════════════════════════════════════
+// SUBMIT (write to Sheets via POST)
+// ══════════════════════════════════════
+function submitIncome(type) {
+  var row, tbody, entry;
+  if (type === 'private') {
+    var s = parseInt(document.getElementById('p-sessions').value)||0;
+    var r = parseInt(document.getElementById('p-rate').value)||0;
+    entry = {
+      sheet:'Income_Private',
+      date:   document.getElementById('p-date').value,
+      student:document.getElementById('p-student').value,
+      coach:  document.getElementById('p-coach').value,
+      branch: document.getElementById('p-branch').value,
+      sessions: s, rate: r, amount: s*r,
+      pay:    document.getElementById('p-pay').value,
+      status: document.getElementById('p-status').value,
+      note:   document.getElementById('p-note').value,
+    };
+    STORE.income_private.unshift({ date:entry.date, student:entry.student, coach:entry.coach, branch:entry.branch, sessions:s, amount:s*r, pay:entry.pay, status:entry.status });
+    renderPrivateTable();
+  } else if (type === 'court') {
+    var d = parseInt(document.getElementById('c-dur').value)||0;
+    var cr = parseInt(document.getElementById('c-rate').value)||0;
+    entry = {
+      sheet:'Income_Court',
+      date:   document.getElementById('c-date').value,
+      name:   document.getElementById('c-name').value,
+      court:  document.getElementById('c-branch').value,
+      start:  document.getElementById('c-start').value,
+      duration: d, amount: d*cr,
+      pay:    document.getElementById('c-pay').value,
+      status: document.getElementById('c-status').value,
+    };
+    STORE.income_court.unshift({ date:entry.date, name:entry.name, court:entry.court, duration:d, amount:d*cr, status:entry.status });
+    renderCourtTable();
+  } else if (type === 'shop') {
+    var q = parseInt(document.getElementById('sh-qty').value)||0;
+    var p = parseInt(document.getElementById('sh-price').value)||0;
+    var c = parseInt(document.getElementById('sh-cost').value)||0;
+    entry = {
+      sheet:'Income_Shop',
+      date:   document.getElementById('sh-date').value,
+      item:   document.getElementById('sh-type').value + ' — ' + document.getElementById('sh-brand').value,
+      buyer:  document.getElementById('sh-buyer').value,
+      qty: q, price: p, cost: c, profit: q*(p-c),
+      branch: document.getElementById('sh-branch').value,
+    };
+    STORE.income_shop.unshift({ date:entry.date, item:entry.item, qty:q, price:q*p, cost:q*c, branch:entry.branch });
+    renderShopTable();
+  }
+
+  // also add to transactions
+  if (entry) {
+    STORE.transactions.unshift({ date:entry.date||'', desc:entry.note||entry.item||entry.name||'', type:'income', cat:type==='private'?'کلاس خصوصی':type==='court'?'اجاره زمین':'فروش تجهیزات', branch:entry.branch||'', amount:entry.amount||0, pay:entry.pay||'', status:entry.status||'پرداخت شده' });
+  }
+
+  apiPost(entry).then(function(){ showToast('با موفقیت در Google Sheets ثبت شد'); });
+}
+
+function submitExpense(type) {
+  var entry;
+  if (type === 'coach') {
+    var g  = parseInt(document.getElementById('ec-group').value)||0;
+    var gr = parseInt(document.getElementById('ec-grate').value)||0;
+    var p  = parseInt(document.getElementById('ec-private').value)||0;
+    var pr = parseInt(document.getElementById('ec-prate').value)||0;
+    var b  = parseInt(document.getElementById('ec-bonus').value)||0;
+    var total = g*gr + p*pr + b;
+    entry = { sheet:'Expense_Coaches', month:document.getElementById('ec-month').value, coach:document.getElementById('ec-coach').value, branch:document.getElementById('ec-branch').value, group:g, private:p, bonus:b, total:total, status:'در انتظار' };
+    STORE.expense_coach.unshift({ month:entry.month, coach:entry.coach, branch:entry.branch, group:g, private:p, bonus:b, total:total, status:'در انتظار' });
+    renderCoachPayTable();
+    STORE.transactions.unshift({ date:'', desc:'حقوق '+entry.coach, type:'expense', cat:'حقوق مربیان', branch:entry.branch, amount:total, pay:'انتقال', status:'در انتظار' });
+  } else if (type === 'rent') {
+    entry = { sheet:'Expense_Rent', month:document.getElementById('er-month').value, branch:document.getElementById('er-branch').value, amount:parseInt(document.getElementById('er-amount').value)||0, date:document.getElementById('er-date').value, note:document.getElementById('er-note').value };
+    STORE.expense_rent.unshift({ month:entry.month, branch:entry.branch, amount:entry.amount, date:entry.date, note:entry.note });
+    renderRentTable();
+    STORE.transactions.unshift({ date:entry.date, desc:'اجاره '+entry.branch, type:'expense', cat:'اجاره ماهانه', branch:entry.branch, amount:entry.amount, pay:'چک', status:'پرداخت شده' });
+  } else if (type === 'ops') {
+    entry = { sheet:'Expense_Ops', date:document.getElementById('op-date').value, cat:document.getElementById('op-cat').value, desc:document.getElementById('op-desc').value, branch:document.getElementById('op-branch').value, amount:parseInt(document.getElementById('op-amount').value)||0, pay:document.getElementById('op-pay').value };
+    STORE.expense_ops.unshift({ date:entry.date, cat:entry.cat, desc:entry.desc, branch:entry.branch, amount:entry.amount, pay:entry.pay });
+    renderOpsTable();
+    STORE.transactions.unshift({ date:entry.date, desc:entry.desc, type:'expense', cat:entry.cat, branch:entry.branch, amount:entry.amount, pay:entry.pay, status:'پرداخت شده' });
+  }
+  apiPost(entry).then(function(){ showToast('با موفقیت در Google Sheets ثبت شد'); });
+}
+
+function submitQuickTx() {
+  var entry = {
+    sheet:'Transactions',
+    type:   document.getElementById('tx-type').value,
+    cat:    document.getElementById('tx-cat').value,
+    amount: parseInt(document.getElementById('tx-amount').value)||0,
+    date:   document.getElementById('tx-date').value,
+    branch: document.getElementById('tx-branch').value,
+    pay:    document.getElementById('tx-pay').value,
+    desc:   document.getElementById('tx-desc').value,
+    status: 'پرداخت شده',
+  };
+  STORE.transactions.unshift({ date:entry.date, desc:entry.desc, type:entry.type, cat:entry.cat, branch:entry.branch, amount:entry.amount, pay:entry.pay, status:entry.status });
+  apiPost(entry).then(function(){ showToast('تراکنش ثبت شد'); closeModal('modal-tx'); renderDashboard(); });
+}
+
+// ══════════════════════════════════════
+// RENDER TABLES
+// ══════════════════════════════════════
+function renderPrivateTable() {
+  document.getElementById('private-tbody').innerHTML = STORE.income_private.map(function(r){
+    return '<tr><td>'+r.date+'</td><td>'+r.student+'</td><td>'+r.coach+'</td><td>'+r.branch+'</td><td>'+r.sessions+'</td><td>'+fmtN(r.amount)+'</td><td>'+r.pay+'</td><td>'+statusBadge(r.status)+'</td></tr>';
+  }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--ink-3)">داده‌ای وجود ندارد</td></tr>';
+}
+function renderCourtTable() {
+  document.getElementById('court-tbody').innerHTML = STORE.income_court.map(function(r){
+    return '<tr><td>'+r.date+'</td><td>'+r.name+'</td><td>'+r.court+'</td><td>'+r.duration+' ساعت</td><td>'+fmtN(r.amount)+'</td><td>'+statusBadge(r.status)+'</td></tr>';
+  }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--ink-3)">داده‌ای وجود ندارد</td></tr>';
+}
+function renderShopTable() {
+  document.getElementById('shop-tbody').innerHTML = STORE.income_shop.map(function(r){
+    return '<tr><td>'+r.date+'</td><td>'+r.item+'</td><td>'+r.qty+'</td><td>'+fmtN(r.price)+'</td><td>'+fmtN(r.cost)+'</td><td style="color:var(--green);font-weight:bold">'+fmtN(r.price - r.cost)+'</td><td>'+r.branch+'</td></tr>';
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--ink-3)">داده‌ای وجود ندارد</td></tr>';
+}
+function renderCoachPayTable() {
+  document.getElementById('coach-pay-tbody').innerHTML = STORE.expense_coach.map(function(r){
+    return '<tr><td>'+r.month+'</td><td>'+r.coach+'</td><td>'+r.branch+'</td><td>'+r.group+'</td><td>'+r.private+'</td><td>'+fmtN(r.bonus)+'</td><td style="font-weight:bold">'+fmtN(r.total)+'</td><td>'+statusBadge(r.status)+'</td></tr>';
+  }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--ink-3)">داده‌ای وجود ندارد</td></tr>';
+}
+function renderRentTable() {
+  document.getElementById('rent-tbody').innerHTML = STORE.expense_rent.map(function(r){
+    return '<tr><td>'+r.month+'</td><td>'+r.branch+'</td><td>'+fmtN(r.amount)+'</td><td>'+r.date+'</td><td>'+r.note+'</td></tr>';
+  }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--ink-3)">داده‌ای وجود ندارد</td></tr>';
+}
+function renderOpsTable() {
+  document.getElementById('ops-tbody').innerHTML = STORE.expense_ops.map(function(r){
+    return '<tr><td>'+r.date+'</td><td>'+r.cat+'</td><td>'+r.desc+'</td><td>'+r.branch+'</td><td>'+fmtN(r.amount)+'</td><td>'+r.pay+'</td></tr>';
+  }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--ink-3)">داده‌ای وجود ندارد</td></tr>';
+}
+
+// ══════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════
+function renderDashboard() {
+  var tx = STORE.transactions;
+  var totalInc  = tx.filter(function(t){ return t.type==='income'; }).reduce(function(s,t){ return s+t.amount; },0);
+  var totalExp  = tx.filter(function(t){ return t.type==='expense'; }).reduce(function(s,t){ return s+t.amount; },0);
+  var netProfit = totalInc - totalExp;
+  var margin    = totalInc > 0 ? Math.round(netProfit/totalInc*100) : 0;
+
+  document.getElementById('dash-metrics').innerHTML = [
+    { label:'درآمد کل', value: fmtM(totalInc)+' ت', sub:'۶ ماه اخیر', cls:'metric-accent' },
+    { label:'هزینه کل', value: fmtM(totalExp)+' ت', sub:'', cls:'metric-red' },
+    { label:'سود خالص', value: fmtM(netProfit)+' ت', sub:'حاشیه '+margin+'٪', cls:'metric-green' },
+    { label:'بدهکاران', value: STORE.debtors ? STORE.debtors.length : '۰', sub:'نیاز به پیگیری', cls:'metric-amber' },
+  ].map(function(m){
+    return '<div class="metric '+m.cls+'"><div class="metric-label">'+m.label+'</div><div class="metric-value">'+m.value+'</div><div class="metric-sub">'+m.sub+'</div></div>';
+  }).join('');
+
+  // Monthly mini-bars
+  var months = ['فر','ارد','خر','تیر','مرد','شه'];
+  var monthlyInc = months.map(function(_,i) {
+    return tx.filter(function(t){ return t.type==='income' && t.date && t.date.indexOf('/0'+(i+1)+'/') !== -1; }).reduce(function(s,t){ return s+t.amount; },0);
+  });
+  var maxV = Math.max.apply(null, monthlyInc) || 1;
+  var colors = ['#1a6eb5','#1a6eb5','#1a6eb5','#1a6eb5','#1a6eb5','#0f4c81'];
+  document.getElementById('monthly-chart').innerHTML = monthlyInc.map(function(v,i){
+    var h = Math.max(6, Math.round(v/maxV*44));
+    return '<div class="mini-bar" style="height:'+h+'px;background:'+colors[i]+'" data-tip="'+months[i]+': '+fmtM(v)+'ت"></div>';
+  }).join('');
+  document.getElementById('monthly-labels').innerHTML = months.map(function(m){ return '<span>'+m+'</span>'; }).join('');
+
+  // Income mix
+  var cats = {};
+  tx.filter(function(t){ return t.type==='income'; }).forEach(function(t){
+    var c = t.cat||'سایر'; cats[c]=(cats[c]||0)+t.amount;
+  });
+  var catColors = { 'شهریه گروهی':'#0f4c81','کلاس خصوصی':'#1d9e75','اجاره زمین':'#d69e2e','فروش تجهیزات':'#7c3aed','سایر':'#718096' };
+  var maxC = Math.max.apply(null, Object.values(cats).map(Number)) || 1;
+  document.getElementById('income-mix-chart').innerHTML = Object.keys(cats).map(function(c){
+    var pct = Math.round(cats[c]/totalInc*100);
+    return '<div class="chart-bar-row"><div class="chart-bar-label">'+c+'</div>'+
+      '<div class="chart-bar-bg"><div class="chart-bar-fill" style="width:'+Math.round(cats[c]/maxC*100)+'%;background:'+(catColors[c]||'#718096')+'">'+
+      '<span class="chart-bar-val">'+pct+'٪</span></div></div>'+
+      '<div class="chart-bar-num">'+fmtM(cats[c])+'</div></div>';
+  }).join('');
+
+  // Expense mix
+  var ecats = {};
+  tx.filter(function(t){ return t.type==='expense'; }).forEach(function(t){
+    var c = t.cat||'سایر'; ecats[c]=(ecats[c]||0)+t.amount;
+  });
+  var ecolors = { 'حقوق مربیان':'#d97706','اجاره ماهانه':'#dc2626','تجهیزات و نگهداری':'#0f4c81','بازاریابی و تبلیغات':'#7c3aed','سایر':'#718096' };
+  var maxE = Math.max.apply(null, Object.values(ecats).map(Number)) || 1;
+  document.getElementById('expense-mix-chart').innerHTML = Object.keys(ecats).map(function(c){
+    var pct = Math.round(ecats[c]/totalExp*100);
+    return '<div class="chart-bar-row"><div class="chart-bar-label">'+c+'</div>'+
+      '<div class="chart-bar-bg"><div class="chart-bar-fill" style="width:'+Math.round(ecats[c]/maxE*100)+'%;background:'+(ecolors[c]||'#718096')+'">'+
+      '<span class="chart-bar-val">'+pct+'٪</span></div></div>'+
+      '<div class="chart-bar-num">'+fmtM(ecats[c])+'</div></div>';
+  }).join('');
+
+  // Branch profit
+  var branches = ['بابل','ساری','تهران','قائمشهر'];
+  var bprofits = branches.map(function(b){
+    var inc = tx.filter(function(t){ return t.type==='income'&&t.branch===b; }).reduce(function(s,t){ return s+t.amount; },0);
+    var exp = tx.filter(function(t){ return t.type==='expense'&&t.branch===b; }).reduce(function(s,t){ return s+t.amount; },0);
+    return { b:b, profit: inc-exp };
+  });
+  var maxP = Math.max.apply(null, bprofits.map(function(x){ return x.profit; })) || 1;
+  document.getElementById('branch-profit-chart').innerHTML = bprofits.map(function(x){
+    var positive = x.profit >= 0;
+    return '<div class="chart-bar-row"><div class="chart-bar-label">'+x.b+'</div>'+
+      '<div class="chart-bar-bg"><div class="chart-bar-fill" style="width:'+Math.max(5,Math.round(Math.abs(x.profit)/maxP*100))+'%;background:'+(positive?'#16a34a':'#dc2626')+'">'+
+      '<span class="chart-bar-val">'+fmtM(x.profit)+'</span></div></div></div>';
+  }).join('');
+
+  // Recent tx
+  document.getElementById('recent-tx-body').innerHTML = tx.slice(0,8).map(function(t){
+    return '<tr><td>'+t.date+'</td><td>'+t.desc+'</td>'+
+      '<td><span class="badge '+(t.type==='income'?'b-green':'b-red')+'">'+(t.type==='income'?'درآمد':'هزینه')+'</span></td>'+
+      '<td>'+t.branch+'</td><td style="font-weight:bold;color:'+(t.type==='income'?'var(--green)':'var(--red)')+'">'+fmtN(t.amount)+' ت</td>'+
+      '<td>'+statusBadge(t.status)+'</td></tr>';
+  }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--ink-3)">داده‌ای وجود ندارد</td></tr>';
+}
+
+// ══════════════════════════════════════
+// P&L
+// ══════════════════════════════════════
+function plTab(mode, el) {
+  document.querySelectorAll('.inner-tab').forEach(function(t){ t.classList.remove('active'); });
+  el.classList.add('active');
+  renderPL(mode);
+}
+function renderPL(mode) {
+  var tx = STORE.transactions;
+  var months = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور'];
+  var rows = months.map(function(m, i) {
+    var idx = '0'+(i+1);
+    var inc = tx.filter(function(t){ return t.type==='income'&&t.date&&t.date.indexOf('/'+idx+'/')!==-1; }).reduce(function(s,t){ return s+t.amount; },0);
+    var exp = tx.filter(function(t){ return t.type==='expense'&&t.date&&t.date.indexOf('/'+idx+'/')!==-1; }).reduce(function(s,t){ return s+t.amount; },0);
+    var profit = inc-exp;
+    var marg = inc>0 ? Math.round(profit/inc*100) : 0;
+    return { period:m+' ۱۴۰۴', inc:inc, exp:exp, profit:profit, marg:marg };
+  });
+  var totInc = rows.reduce(function(s,r){ return s+r.inc; },0);
+  var totExp = rows.reduce(function(s,r){ return s+r.exp; },0);
+  var totPr  = totInc - totExp;
+  var totMrg = totInc>0 ? Math.round(totPr/totInc*100) : 0;
+  document.getElementById('pl-metrics').innerHTML = [
+    { label:'درآمد ۶ ماه', value:fmtM(totInc)+' ت', cls:'metric-accent' },
+    { label:'هزینه ۶ ماه', value:fmtM(totExp)+' ت', cls:'metric-red' },
+    { label:'سود خالص', value:fmtM(totPr)+' ت', cls:'metric-green' },
+    { label:'حاشیه سود', value:totMrg+'٪', cls:'metric-amber' },
+  ].map(function(m){ return '<div class="metric '+m.cls+'"><div class="metric-label">'+m.label+'</div><div class="metric-value">'+m.value+'</div></div>'; }).join('');
+  document.getElementById('pl-tbody').innerHTML = rows.map(function(r){
+    return '<tr><td>'+r.period+'</td><td style="color:var(--green);font-weight:bold">'+fmtN(r.inc)+'</td>'+
+      '<td style="color:var(--red)">'+fmtN(r.exp)+'</td>'+
+      '<td style="font-weight:bold;color:'+(r.profit>=0?'var(--green)':'var(--red)')+'">'+fmtN(r.profit)+'</td>'+
+      '<td>'+r.marg+'٪</td>'+
+      '<td>'+(r.profit>0?'<span class="badge b-green">سودده</span>':'<span class="badge b-red">زیان‌ده</span>')+'</td></tr>';
+  }).join('');
+}
+loadAll();
+renderPrivateTable();renderCourtTable();renderShopTable();
+renderCoachPayTable();renderRentTable();renderOpsTable();
+</script></body></html>
