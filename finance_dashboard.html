@@ -300,7 +300,38 @@ tr:hover td { background: #fafbfd; }
 </head>
 <body>
 
-<div class="app">
+<!-- ══════════ صفحه ورود (Login Gate) ══════════ -->
+<div id="login-gate" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(150deg,#0a2540,#071a2f);display:flex;align-items:center;justify-content:center;padding:20px;font-family:Tahoma,sans-serif;direction:rtl">
+  <div style="width:100%;max-width:380px;background:rgba(255,255,255,0.04);border:1px solid rgba(143,163,184,0.18);border-radius:22px;padding:38px 30px;text-align:center;backdrop-filter:blur(12px)">
+    <div style="font-size:44px;margin-bottom:10px">🎾</div>
+    <div style="font-size:20px;font-weight:bold;color:#f7fafc;margin-bottom:6px">سیستم مدیریت مالی</div>
+    <div style="font-size:13px;color:#8fa3b8;margin-bottom:28px">برای ورود، نام کاربری و رمز خود را وارد کنید</div>
+
+    <div style="text-align:right;margin-bottom:16px">
+      <label style="display:block;font-size:12px;color:#b8c7d6;margin-bottom:7px">نام کاربری</label>
+      <input id="login-user" type="text" placeholder="admin" autocomplete="username" dir="ltr"
+        style="width:100%;padding:13px 15px;background:rgba(255,255,255,0.05);border:1px solid rgba(143,163,184,0.25);border-radius:12px;color:#fff;font-family:inherit;font-size:14px;text-align:left;outline:none">
+    </div>
+    <div style="text-align:right;margin-bottom:22px">
+      <label style="display:block;font-size:12px;color:#b8c7d6;margin-bottom:7px">رمز عبور</label>
+      <input id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password" dir="ltr"
+        onkeydown="if(event.key==='Enter')doLogin()"
+        style="width:100%;padding:13px 15px;background:rgba(255,255,255,0.05);border:1px solid rgba(143,163,184,0.25);border-radius:12px;color:#fff;font-family:inherit;font-size:14px;text-align:left;outline:none">
+    </div>
+
+    <button onclick="doLogin()"
+      style="width:100%;padding:14px;border:none;border-radius:50px;background:linear-gradient(135deg,#1e88e5,#38bdf8);color:#071a2f;font-family:inherit;font-size:15px;font-weight:bold;cursor:pointer;transition:transform .2s">
+      ورود به سیستم
+    </button>
+    <div id="login-error" style="font-size:12px;color:#e0685f;margin-top:14px;min-height:16px"></div>
+
+    <div style="font-size:11px;color:#5a6b7d;margin-top:20px;line-height:1.8">
+      این بخش محرمانه است و فقط برای مدیر و مربیان آکادمی می‌باشد
+    </div>
+  </div>
+</div>
+
+<div class="app" id="app-main" style="display:none">
 
 <!-- ══════════ SIDEBAR ══════════ -->
 <div class="sidebar">
@@ -331,6 +362,10 @@ tr:hover td { background: #fafbfd; }
   <div class="nav-item" onclick="goto('report-branch',this)"><span class="nav-icon">🏙</span> مقایسه شعبات</div>
   <div class="nav-item" onclick="goto('report-coach',this)"><span class="nav-icon">🏆</span> عملکرد مربیان</div>
   <div class="nav-item" onclick="goto('report-forecast',this)"><span class="nav-icon">🔮</span> پیش‌بینی</div>
+
+  <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+    <div class="nav-item" onclick="logout()" style="color:#e0685f"><span class="nav-icon">🚪</span> خروج</div>
+  </div>
 </div>
 
 <!-- ══════════ MAIN ══════════ -->
@@ -402,8 +437,8 @@ tr:hover td { background: #fafbfd; }
         <div class="card-title"><span class="card-title-icon">🎾</span> ثبت کلاس خصوصی</div>
         <div class="form-row form-row-3">
           <div class="form-group"><label>نام هنرجو</label><input id="p-student" type="text" placeholder="نام کامل"></div>
-          <div class="form-group"><label>مربی</label><select id="p-coach"><option>محمد صابرقدیم</option><option>ارمین دارایی</option><option>شهبد والهی</option><option>تینا صابرقدیم</option></select></div>
-          <div class="form-group"><label>شعبه</label><select id="p-branch"><option>بابل</option><option>ساری</option><option>تهران</option><option>قائمشهر</option><option>نوشهر</option><option>سمنان</option><option>تبریز</option></select></div>
+          <div class="form-group"><label>مربی</label><select id="p-coach"><option>محمدحسین صابرقدیم</option><option>تینا صابرقدیم</option><option>ارمین دارایی</option></select></div>
+          <div class="form-group"><label>شعبه</label><select id="p-branch"><option>قائمشهر</option><option>ساری</option><option>تهران</option></select></div>
         </div>
         <div class="form-row form-row-3">
           <div class="form-group"><label>تعداد جلسات</label><input id="p-sessions" type="number" value="1" min="1" oninput="calcPrivate()"></div>
@@ -436,7 +471,7 @@ tr:hover td { background: #fafbfd; }
         <div class="card-title"><span class="card-title-icon">🏟</span> ثبت اجاره زمین (سانس آزاد)</div>
         <div class="form-row form-row-3">
           <div class="form-group"><label>نام مستاجر</label><input id="c-name" type="text" placeholder="نام شخص یا گروه"></div>
-          <div class="form-group"><label>شعبه / زمین</label><select id="c-branch"><option>قاِمشهر— زمین ۱</option><option>بابل — زمین ۲</option><option>ساری — زمین ۱</option><option>تهران — زمین ۱</option><option>تهران — زمین ۲</option></select></div>
+          <div class="form-group"><label>شعبه / زمین</label><select id="c-branch"><option>قائمشهر — زمین ۱</option></select></div>
           <div class="form-group"><label>تاریخ</label><input id="c-date" type="text" placeholder="۱۴۰۴/۰۲/۱۵"></div>
         </div>
         <div class="form-row form-row-3">
@@ -478,7 +513,7 @@ tr:hover td { background: #fafbfd; }
           <div class="form-group"><label>قیمت خرید واحد (بهای تمام شده)</label><input id="sh-cost" type="number" value="0" oninput="calcShop()"></div>
         </div>
         <div class="form-row form-row-3">
-          <div class="form-group"><label>شعبه</label><select id="sh-branch"><option>بابل</option><option>ساری</option><option>تهران</option><option>قائمشهر</option></select></div>
+          <div class="form-group"><label>شعبه</label><select id="sh-branch"><option>قائمشهر</option><option>ساری</option><option>تهران</option></select></div>
           <div class="form-group"><label>تاریخ</label><input id="sh-date" type="text" placeholder="۱۴۰۴/۰۲/۱۵"></div>
           <div class="form-group">
             <label>سود فروش</label>
@@ -501,9 +536,9 @@ tr:hover td { background: #fafbfd; }
       <div class="card">
         <div class="card-title"><span class="card-title-icon">👨‍🏫</span> ثبت حقوق مربی</div>
         <div class="form-row form-row-3">
-          <div class="form-group"><label>نام مربی</label><select id="ec-coach"><option>محمد صابرقدیم</option><option>تینا صابرقدیم</option><option>ارمین دارایی</option><option>نیلوفر حسینی</option><option>کامران فتحی</option></select></div>
+          <div class="form-group"><label>نام مربی</label><select id="ec-coach"><option>محمدحسین صابرقدیم</option><option>تینا صابرقدیم</option><option>ارمین دارایی</option></select></div>
           <div class="form-group"><label>ماه پرداخت</label><input id="ec-month" type="text" placeholder="اردیبهشت ۱۴۰۴"></div>
-          <div class="form-group"><label>شعبه</label><select id="ec-branch"><option>بابل</option><option>ساری</option><option>تهران</option><option>قائمشهر</option></select></div>
+          <div class="form-group"><label>شعبه</label><select id="ec-branch"><option>قائمشهر</option><option>ساری</option><option>تهران</option></select></div>
         </div>
         <div class="form-row form-row-3">
           <div class="form-group"><label>تعداد جلسات گروهی</label><input id="ec-group" type="number" value="0" oninput="calcCoach()"></div>
@@ -534,7 +569,7 @@ tr:hover td { background: #fafbfd; }
       <div class="card">
         <div class="card-title"><span class="card-title-icon">🏢</span> ثبت اجاره زمین (هزینه)</div>
         <div class="form-row form-row-3">
-          <div class="form-group"><label>شعبه</label><select id="er-branch"><option>بابل</option><option>ساری</option><option>تهران</option><option>قائمشهر</option><option>نوشهر</option><option>سمنان</option><option>تبریز</option></select></div>
+          <div class="form-group"><label>شعبه</label><select id="er-branch"><option>ساری</option><option>تهران</option></select></div>
           <div class="form-group"><label>ماه</label><input id="er-month" type="text" placeholder="اردیبهشت ۱۴۰۴"></div>
           <div class="form-group"><label>مبلغ (تومان)</label><input id="er-amount" type="number" placeholder="۰"></div>
         </div>
@@ -569,7 +604,7 @@ tr:hover td { background: #fafbfd; }
             </select>
           </div>
           <div class="form-group"><label>توضیح</label><input id="op-desc" type="text" placeholder="شرح هزینه"></div>
-          <div class="form-group"><label>شعبه</label><select id="op-branch"><option>مرکزی (همه)</option><option>بابل</option><option>ساری</option><option>تهران</option><option>قائمشهر</option></select></div>
+          <div class="form-group"><label>شعبه</label><select id="op-branch"><option>مرکزی (همه)</option><option>قائمشهر</option><option>ساری</option><option>تهران</option></select></div>
         </div>
         <div class="form-row form-row-3">
           <div class="form-group"><label>مبلغ (تومان)</label><input id="op-amount" type="number" placeholder="۰"></div>
@@ -701,8 +736,7 @@ tr:hover td { background: #fafbfd; }
       <div class="form-row form-row-2">
         <div class="form-group"><label>شعبه</label>
           <select id="tx-branch">
-            <option>بابل</option><option>ساری</option><option>تهران</option>
-            <option>قائمشهر</option><option>نوشهر</option><option>سمنان</option><option>تبریز</option>
+            <option>قائمشهر</option><option>ساری</option><option>تهران</option>
           </select>
         </div>
         <div class="form-group"><label>روش پرداخت</label>
@@ -722,9 +756,51 @@ tr:hover td { background: #fafbfd; }
 
 <script>
 // ══════════════════════════════════════
+// 🔐 سیستم ورود (Login Gate)
+// ══════════════════════════════════════
+// رمزهای موقت — بعداً از همین‌جا عوض کنید
+var USERS = {
+  'admin':  { pass: 'Y-admin-2024', role: 'مدیر',   name: 'مدیر آکادمی' },
+  'coach1': { pass: 'coach-1122',   role: 'مربی',   name: 'مربی ۱' },
+  'coach2': { pass: 'coach-3344',   role: 'مربی',   name: 'مربی ۲' }
+};
+
+function doLogin() {
+  var u = (document.getElementById('login-user').value || '').trim().toLowerCase();
+  var p = document.getElementById('login-pass').value || '';
+  var err = document.getElementById('login-error');
+  if (USERS[u] && USERS[u].pass === p) {
+    // ورود موفق — نمایش داشبورد
+    try { sessionStorage.setItem('yt_auth', u); } catch(e){}
+    document.getElementById('login-gate').style.display = 'none';
+    document.getElementById('app-main').style.display = '';
+    err.textContent = '';
+  } else {
+    err.textContent = '❌ نام کاربری یا رمز عبور اشتباه است';
+    document.getElementById('login-pass').value = '';
+  }
+}
+
+// اگر قبلاً در همین نشست وارد شده، مستقیم نمایش بده
+(function checkAuth(){
+  try {
+    var a = sessionStorage.getItem('yt_auth');
+    if (a && USERS[a]) {
+      document.getElementById('login-gate').style.display = 'none';
+      document.getElementById('app-main').style.display = '';
+    }
+  } catch(e){}
+})();
+
+function logout() {
+  try { sessionStorage.removeItem('yt_auth'); } catch(e){}
+  location.reload();
+}
+
+// ══════════════════════════════════════
 // ⚠️  آدرس API شما — فقط این را عوض کنید
 // ══════════════════════════════════════
-var API = 'https://script.google.com/macros/s/AKfycbyLUrrflJQRbYbNacLbvUmii9bAkIR1FTGWpSfdCwmF_2mc6nh0gsBFMCMsGCexiS-zzA/exec';
+var API = 'https://script.google.com/macros/s/AKfycbwPhEQVUqfkgF4Twk2EyD_WgQ35j2-a3owt-eUY2qXnE-uUAIMtYNQMR7yP87wBRqdBaw/exec';
 
 // ══════════════════════════════════════
 // LOCAL DATA STORE
@@ -812,59 +888,18 @@ function loadAll() {
 // SEED DEMO DATA (اگر شیت خالی باشد)
 // ══════════════════════════════════════
 function seedDemoData() {
-  if (STORE.transactions.length > 0) return;
-  var months = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور'];
-  var branches = ['بابل','ساری','تهران','قائمشهر','نوشهر'];
-  var coaches  = ['محمد صابرقدیم','تینا صابرقدیم','ارمین دارایی','نیلوفر حسینی','کامران فتحی'];
-
-  months.forEach(function(m, mi) {
-    ['بابل','ساری','تهران','قائمشهر'].forEach(function(b) {
-      var baseInc = b==='تهران' ? 18000000 : b==='بابل'||b==='ساری' ? 13000000 : 8000000;
-      STORE.transactions.push({ date:'۱۴۰۴/'+String(mi+1).padStart(2,'0')+'/01', desc:'شهریه گروهی '+m, type:'income', cat:'شهریه گروهی', branch:b, amount: baseInc + Math.round(Math.random()*2000000), pay:'کارت', status:'پرداخت شده' });
-      STORE.transactions.push({ date:'۱۴۰۴/'+String(mi+1).padStart(2,'0')+'/15', desc:'حقوق مربیان '+m, type:'expense', cat:'حقوق مربیان', branch:b, amount: Math.round(baseInc*0.35), pay:'انتقال', status:'پرداخت شده' });
-      STORE.transactions.push({ date:'۱۴۰۴/'+String(mi+1).padStart(2,'0')+'/05', desc:'اجاره زمین '+m, type:'expense', cat:'اجاره ماهانه', branch:b, amount: b==='تهران' ? 9000000 : 4000000, pay:'چک', status:'پرداخت شده' });
-    });
-    STORE.transactions.push({ date:'۱۴۰۴/'+String(mi+1).padStart(2,'0')+'/10', desc:'کلاس خصوصی', type:'income', cat:'کلاس خصوصی', branch:'بابل', amount:2100000, pay:'کارت', status:'پرداخت شده' });
-    STORE.transactions.push({ date:'۱۴۰۴/'+String(mi+1).padStart(2,'0')+'/12', desc:'اجاره زمین آزاد', type:'income', cat:'اجاره زمین', branch:'ساری', amount:1500000, pay:'نقد', status:'پرداخت شده' });
-    STORE.transactions.push({ date:'۱۴۰۴/'+String(mi+1).padStart(2,'0')+'/20', desc:'فروش راکت Wilson', type:'income', cat:'فروش تجهیزات', branch:'تهران', amount:3200000, pay:'کارت', status:'پرداخت شده' });
-  });
-
-  STORE.income_private = [
-    { date:'۱۴۰۴/۰۲/۱۰', student:'رضا نوری', coach:'محمد صابرقدیم', branch:'بابل', sessions:3, amount:2100000, pay:'کارت', status:'پرداخت شده' },
-    { date:'۱۴۰۴/۰۲/۱۵', student:'مریم احمدی', coach:'تینا صابرقدیم', branch:'ساری', sessions:2, amount:1400000, pay:'نقد', status:'پرداخت شده' },
-    { date:'۱۴۰۴/۰۲/۱۸', student:'علی رضایی', coach:'آرمین دارایی', branch:'تهران', sessions:5, amount:3500000, pay:'کارت', status:'معوق' },
-  ];
-  STORE.income_court = [
-    { date:'۱۴۰۴/۰۲/۰۵', name:'تیم دوستانه', court:'بابل — زمین ۱', duration:2, amount:1000000, status:'پرداخت شده' },
-    { date:'۱۴۰۴/۰۲/۱۱', name:'سامان کریمی', court:'ساری — زمین ۱', duration:1, amount:500000, status:'پرداخت شده' },
-  ];
-  STORE.income_shop = [
-    { date:'۱۴۰۴/۰۱/۲۰', item:'راکت Wilson Pro', qty:2, price:3200000, cost:2100000, branch:'تهران' },
-    { date:'۱۴۰۴/۰۲/۰۳', item:'توپ Head (۳تایی)', qty:5, price:250000, cost:160000, branch:'بابل' },
-  ];
-  STORE.expense_coach = [
-    { month:'فروردین ۱۴۰۴', coach:'محمد صابرقدیم', branch:'بابل', group:12, private:4, bonus:500000, total:6700000, status:'پرداخت شده' },
-    { month:'فروردین ۱۴۰۴', coach:'تینا صابرقدیم',  branch:'ساری', group:10, private:2, bonus:0,      total:4700000, status:'پرداخت شده' },
-    { month:'اردیبهشت ۱۴۰۴', coach:'', branch:'تهران', group:14, private:6, bonus:800000, total:7300000, status:'در انتظار' },
-  ];
-  STORE.expense_rent = [
-    { month:'فروردین ۱۴۰۴', branch:'بابل', amount:4000000, date:'۱۴۰۴/۰۱/۰۳', note:'' },
-    { month:'فروردین ۱۴۰۴', branch:'ساری', amount:4000000, date:'۱۴۰۴/۰۱/۰۴', note:'' },
-    { month:'فروردین ۱۴۰۴', branch:'تهران', amount:9000000, date:'۱۴۰۴/۰۱/۰۵', note:'' },
-  ];
-  STORE.expense_ops = [
-    { date:'۱۴۰۴/۰۱/۱۵', cat:'تجهیزات و نگهداری', desc:'خرید توپ جدید (۲ سبد)', branch:'بابل', amount:1200000, pay:'نقد' },
-    { date:'۱۴۰۴/۰۲/۰۱', cat:'بازاریابی و تبلیغات', desc:'تبلیغ اینستاگرام', branch:'مرکزی (همه)', amount:800000, pay:'کارت' },
-  ];
-
-  // debt list
-  STORE.debtors = [
-    { name:'حسن محمدی', branch:'تهران', debt:6552000, days:32, term:'ترم ۱', phone:'09311234569' },
-    { name:'زهرا کریمی', branch:'قائمشهر', debt:3430000, days:18, term:'ترم ۲', phone:'09411234570' },
-    { name:'کامران امیری', branch:'بابل', debt:4320000, days:5, term:'ترم ۴', phone:'09501111111' },
-  ];
-
-  document.getElementById('debt-count').textContent = STORE.debtors.length;
+  // داده‌های نمونه حذف شد — آمار واقعی از Google Sheets خوانده می‌شود
+  // اگر شیت خالی باشد، جداول خالی نمایش داده می‌شوند تا محمد آمار واقعی را وارد کند
+  STORE.transactions = STORE.transactions || [];
+  STORE.income_private = STORE.income_private || [];
+  STORE.income_court = STORE.income_court || [];
+  STORE.income_shop = STORE.income_shop || [];
+  STORE.expense_coach = STORE.expense_coach || [];
+  STORE.expense_rent = STORE.expense_rent || [];
+  STORE.expense_ops = STORE.expense_ops || [];
+  STORE.debtors = STORE.debtors || [];
+  var dc = document.getElementById('debt-count');
+  if (dc) dc.textContent = STORE.debtors.length;
 }
 
 // ══════════════════════════════════════
@@ -1118,7 +1153,7 @@ function renderDashboard() {
   }).join('');
 
   // Branch profit
-  var branches = ['بابل','ساری','تهران','قائمشهر'];
+  var branches = ['قائمشهر','ساری','تهران'];
   var bprofits = branches.map(function(b){
     var inc = tx.filter(function(t){ return t.type==='income'&&t.branch===b; }).reduce(function(s,t){ return s+t.amount; },0);
     var exp = tx.filter(function(t){ return t.type==='expense'&&t.branch===b; }).reduce(function(s,t){ return s+t.amount; },0);
@@ -1180,5 +1215,173 @@ function renderPL(mode) {
 }
 loadAll();
 renderPrivateTable();renderCourtTable();renderShopTable();
-renderCoachPayTable();renderRentTable();renderOpsTable();
+
+// ══════════════════════════════════════
+// P&L
+// ══════════════════════════════════════
+function plTab(mode, el) {
+  document.querySelectorAll('.inner-tab').forEach(function(t){ t.classList.remove('active'); });
+  el.classList.add('active');
+  renderPL(mode);
+}
+
+// ══════════════════════════════════════
+// DEBT
+// ══════════════════════════════════════
+function renderDebt() {
+  var debtors = STORE.debtors || [];
+  var total   = debtors.reduce(function(s,d){ return s+d.debt; },0);
+  var critical = debtors.filter(function(d){ return d.days>=30; }).length;
+  document.getElementById('debt-metrics').innerHTML = [
+    { label:'تعداد بدهکار', value:debtors.length+' نفر', cls:'metric-red' },
+    { label:'مجموع بدهی',   value:fmtM(total)+' ت',      cls:'metric-red' },
+    { label:'بحرانی (+۳۰ روز)', value:critical+' نفر',   cls:'metric-amber' },
+  ].map(function(m){
+    return '<div class="metric '+m.cls+'"><div class="metric-label">'+m.label+'</div><div class="metric-value">'+m.value+'</div></div>';
+  }).join('');
+  document.getElementById('debt-tbody').innerHTML = debtors.sort(function(a,b){ return b.days-a.days; }).map(function(d){
+    var pri = d.days>=30?'<span class="badge b-red">بحرانی</span>':d.days>=15?'<span class="badge b-amber">متوسط</span>':'<span class="badge b-green">کم</span>';
+    var rowCls = d.days>=30?'debt-critical':d.days>=15?'debt-warn':'';
+    return '<tr class="'+rowCls+'"><td>'+d.name+'</td><td>'+d.branch+'</td>'+
+      '<td style="font-weight:bold;color:var(--red)">'+fmtN(d.debt)+' ت</td>'+
+      '<td>'+d.days+' روز</td><td>'+d.term+'</td><td dir="ltr">'+d.phone+'</td><td>'+pri+'</td>'+
+      '<td><button class="btn btn-ghost btn-sm" onclick="markPaid(\''+d.name+'\')">✅ پرداخت شد</button></td></tr>';
+  }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--ink-3);padding:20px">هیچ بدهکاری وجود ندارد 🎉</td></tr>';
+}
+function markPaid(name) {
+  STORE.debtors = STORE.debtors.filter(function(d){ return d.name!==name; });
+  document.getElementById('debt-count').textContent = STORE.debtors.length;
+  renderDebt(); showToast(name+' — پرداخت ثبت شد');
+}
+function exportDebts() { showToast('خروجی Excel آماده می‌شود...'); }
+
+// ══════════════════════════════════════
+// BRANCH
+// ══════════════════════════════════════
+function renderBranch() {
+  var tx = STORE.transactions;
+  var branches = ['قائمشهر','ساری','تهران'];
+  var sc = {'قائمشهر':0,'ساری':0,'تهران':0};
+  var data = branches.map(function(b){
+    var inc = tx.filter(function(t){ return t.type==='income'&&t.branch===b; }).reduce(function(s,t){ return s+t.amount; },0);
+    var exp = tx.filter(function(t){ return t.type==='expense'&&t.branch===b; }).reduce(function(s,t){ return s+t.amount; },0);
+    var profit=inc-exp; var marg=inc>0?Math.round(profit/inc*100):0; var stu=sc[b]||0;
+    return {b:b,inc:inc,exp:exp,profit:profit,marg:marg,stu:stu,perStu:stu>0?Math.round(inc/stu):0};
+  }).sort(function(a,b){ return b.profit-a.profit; });
+  var total=data.reduce(function(s,d){ return s+d.profit; },0);
+  document.getElementById('branch-metrics').innerHTML=[
+    {label:'بهترین شعبه',value:data[0]?data[0].b:'—',sub:data[0]?fmtM(data[0].profit)+' ت سود':'',cls:'metric-green'},
+    {label:'سود کل',value:fmtM(total)+' ت',sub:'همه شعبات',cls:'metric-accent'},
+  ].map(function(m){ return '<div class="metric '+m.cls+'"><div class="metric-label">'+m.label+'</div><div class="metric-value">'+m.value+'</div><div class="metric-sub">'+m.sub+'</div></div>'; }).join('');
+  document.getElementById('branch-tbody').innerHTML=data.map(function(d,i){
+    return '<tr><td><b>'+d.b+'</b></td><td style="color:var(--green)">'+fmtN(d.inc)+'</td>'+
+      '<td style="color:var(--red)">'+fmtN(d.exp)+'</td>'+
+      '<td style="font-weight:bold;color:'+(d.profit>=0?'var(--green)':'var(--red)')+'">'+fmtN(d.profit)+'</td>'+
+      '<td>'+d.marg+'٪</td><td>'+d.stu+'</td><td>'+fmtM(d.perStu)+'</td>'+
+      '<td><span class="badge '+(i===0?'b-green':i===1?'b-blue':'b-gray')+'">#'+(i+1)+'</span></td></tr>';
+  }).join('');
+  var maxP=Math.max.apply(null,data.map(function(d){ return Math.abs(d.profit); }))||1;
+  document.getElementById('branch-compare-chart').innerHTML=data.map(function(d){
+    return '<div class="chart-bar-row"><div class="chart-bar-label">'+d.b+'</div>'+
+      '<div class="chart-bar-bg"><div class="chart-bar-fill" style="width:'+Math.max(5,Math.round(Math.abs(d.profit)/maxP*100))+'%;background:'+(d.profit>=0?'#16a34a':'#dc2626')+'">'+
+      '<span class="chart-bar-val">'+fmtM(d.profit)+' ت</span></div></div></div>';
+  }).join('');
+}
+
+// ══════════════════════════════════════
+// COACH PERFORMANCE
+// ══════════════════════════════════════
+function renderCoach() {
+  // آمار واقعی از رکوردهای حقوق مربیان (expense_coach) و درآمد خصوصی محاسبه می‌شود
+  var coachNames = ['محمدحسین صابرقدیم','تینا صابرقدیم','ارمین دارایی'];
+  var coaches = coachNames.map(function(name){
+    var payRecs = (STORE.expense_coach||[]).filter(function(e){ return e.coach===name; });
+    var privRecs = (STORE.income_private||[]).filter(function(p){ return p.coach===name; });
+    var paid = payRecs.reduce(function(s,e){ return s+(e.total||0); },0);
+    var income = privRecs.reduce(function(s,p){ return s+(p.amount||0); },0);
+    var sessions = privRecs.reduce(function(s,p){ return s+(p.sessions||0); },0);
+    var branch = payRecs.length ? payRecs[0].branch : (privRecs.length ? privRecs[0].branch : '—');
+    return { name:name, branch:branch, sessions:sessions, income:income, paid:paid };
+  });
+  document.getElementById('coach-rows').innerHTML=coaches.map(function(c){
+    var margin = c.income>0 ? Math.round((c.income-c.paid)/c.income*100) : 0;
+    return '<div class="coach-row">'+
+      '<div class="coach-avatar">'+c.name[0]+'</div>'+
+      '<div style="flex:1">'+
+        '<div class="coach-name">'+c.name+' — <span style="font-size:11px;color:var(--ink-3)">'+c.branch+'</span></div>'+
+        '<div class="coach-stat">'+c.sessions+' جلسه خصوصی</div>'+
+        '<div class="progress-wrap" style="margin-top:5px;width:180px"><div class="progress-fill" style="width:'+Math.max(0,margin)+'%;background:var(--green)"></div></div>'+
+      '</div>'+
+      '<div style="text-align:left">'+
+        '<div class="coach-earn">'+fmtM(c.income)+' ت</div>'+
+        '<div style="font-size:11px;color:var(--red)">حقوق: '+fmtM(c.paid)+' ت</div>'+
+      '</div></div>';
+  }).join('');
+}
+
+// ══════════════════════════════════════
+// FORECAST
+// ══════════════════════════════════════
+function renderForecast() {
+  var tx=STORE.transactions;
+  var monthlyInc=[1,2,3,4,5,6].map(function(i){
+    var idx='0'+i;
+    return tx.filter(function(t){ return t.type==='income'&&t.date&&t.date.indexOf('/'+idx+'/')!==-1; }).reduce(function(s,t){ return s+t.amount; },0);
+  });
+  var avg=monthlyInc.reduce(function(s,v){ return s+v; },0)/6;
+  var forecasts=[
+    {label:'مهر ۱۴۰۴', value:Math.round(avg*1.20)},
+    {label:'آبان ۱۴۰۴', value:Math.round(avg*1.22)},
+    {label:'آذر ۱۴۰۴',  value:Math.round(avg*1.24)},
+  ];
+  var foreInc=Math.round(avg*1.20); var foreExp=Math.round(foreInc*0.58);
+  document.getElementById('forecast-metrics').innerHTML=[
+    {label:'پیش‌بینی درآمد ترم پاییز',value:fmtM(foreInc*3)+' ت',cls:'metric-accent'},
+    {label:'پیش‌بینی هزینه',value:fmtM(foreExp*3)+' ت',cls:'metric-red'},
+    {label:'پیش‌بینی سود',value:fmtM((foreInc-foreExp)*3)+' ت',cls:'metric-green'},
+  ].map(function(m){ return '<div class="metric '+m.cls+'"><div class="metric-label">'+m.label+'</div><div class="metric-value">'+m.value+'</div></div>'; }).join('');
+  var months=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور'];
+  var maxF=Math.max.apply(null,forecasts.map(function(f){ return f.value; }))||1;
+  document.getElementById('forecast-chart').innerHTML=
+    months.map(function(m,i){
+      return '<div class="chart-bar-row"><div class="chart-bar-label">'+m+'</div>'+
+        '<div class="chart-bar-bg"><div class="chart-bar-fill" style="width:'+Math.round(monthlyInc[i]/maxF*100)+'%;background:#1a6eb5">'+
+        '<span class="chart-bar-val">'+fmtM(monthlyInc[i])+'</span></div></div></div>';
+    }).join('')+
+    forecasts.map(function(f){
+      return '<div class="chart-bar-row"><div class="chart-bar-label" style="color:var(--purple)">'+f.label+'</div>'+
+        '<div class="chart-bar-bg"><div class="chart-bar-fill" style="width:'+Math.round(f.value/maxF*100)+'%;background:var(--purple);opacity:0.75">'+
+        '<span class="chart-bar-val">'+fmtM(f.value)+'</span></div></div></div>';
+    }).join('');
+  document.getElementById('forecast-assumptions').innerHTML=
+    '📈 نرخ رشد: <b>۲۰٪ سالانه</b><br>'+
+    '👥 هنرجویان جدید: <b>+۳۵ نفر</b><br>'+
+    '💰 افزایش شهریه: <b>+۲۰٪ تمدید</b><br>'+
+    '👨‍🏫 افزایش حقوق مربیان: <b>+۱۵٪</b>';
+}
+
+// ── تاریخ فارسی با اسلش ثابت ──
+function getPersianDate() {
+  var d = new Date();
+  var y = d.getFullYear();
+  var m = String(d.getMonth()+1).padStart(2,'0');
+  var day = String(d.getDate()).padStart(2,'0');
+  return y + '/' + m + '/' + day;
+}
+
+// ── فرمت تاریخ ورودی — اسلش ثابت ──
+function formatDateInput(el) {
+  var v = el.value.replace(/[^0-9]/g,'');
+  if (v.length >= 5) v = v.slice(0,4)+'/'+v.slice(4);
+  if (v.length >= 8) v = v.slice(0,7)+'/'+v.slice(7,9);
+  el.value = v;
+}
+
+// ── اضافه کردن رویداد به همه فیلدهای تاریخ ──
+document.querySelectorAll('input[placeholder*="/"]').forEach(function(el){
+  el.setAttribute('placeholder','۱۴۰۴/۰۲/۱۵');
+  el.setAttribute('maxlength','10');
+  el.addEventListener('input', function(){ formatDateInput(this); });
+});
+
 </script></body></html>
