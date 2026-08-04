@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پرونده هنرجویان — آکادمی تنیس وای</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap');
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --court:   #071a2f;
+  --court-2: #0a2540;
+  --court-3: #0d3b66;
+  --azure:   #1e88e5;
+  --azure-lt:#38bdf8;
+  --orange:  #ff6b35;
+  --orange-lt:#ff8c42;
+  --ice:     #f7fafc;
+  --silver:  #8fa3b8;
+  --silver-2:#b8c7d6;
+  --line:    rgba(143,163,184,0.18);
+  --line-2:  rgba(143,163,184,0.30);
+  --glass:   rgba(255,255,255,0.05);
+  --glass-2: rgba(255,255,255,0.09);
+  --green:   #34c77b;
+  --red:     #e0685f;
+  --r: 14px;
+  --r-pill: 50px;
+}
+body {
+  font-family: 'Vazirmatn', Tahoma, sans-serif;
+  background: linear-gradient(160deg, var(--court), #04101f);
+  color: var(--ice);
+  min-height: 100vh;
+  direction: rtl;
+  line-height: 1.7;
+}
+::-webkit-scrollbar { width: 7px; }
+::-webkit-scrollbar-track { background: var(--court); }
+::-webkit-scrollbar-thumb { background: var(--azure); border-radius: 4px; }
+
+/* ══ LOGIN ══ */
+#gate {
+  position: fixed; inset: 0; z-index: 999;
+  background: linear-gradient(150deg, var(--court-2), var(--court));
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.gate-card {
+  width: 100%; max-width: 370px;
+  background: var(--glass); border: 1px solid var(--line);
+  border-radius: 22px; padding: 36px 28px; text-align: center;
+  backdrop-filter: blur(12px);
+}
+.gate-card h1 { font-size: 19px; margin-bottom: 6px; }
+.gate-card p { font-size: 13px; color: var(--silver); margin-bottom: 26px; }
+
+/* ══ SHELL ══ */
+.wrap { max-width: 900px; margin: 0 auto; padding: 24px 18px 80px; }
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 22px; flex-wrap: wrap; gap: 12px;
+}
+.brand { display: flex; align-items: center; gap: 11px; }
+.brand-y {
+  width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--azure), var(--azure-lt));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 21px; font-weight: 900; color: var(--court);
+}
+.brand-t { font-size: 17px; font-weight: 800; }
+.brand-t small { display: block; font-size: 11px; color: var(--silver); font-weight: 400; }
+.btn-out {
+  background: var(--glass); border: 1px solid var(--line); color: var(--silver-2);
+  padding: 8px 16px; border-radius: var(--r-pill); font-family: inherit;
+  font-size: 12px; cursor: pointer; transition: all .2s;
+}
+.btn-out:hover { color: var(--red); border-color: var(--red); }
+
+/* ══ TABS ══ */
+.tabs { display: flex; gap: 8px; margin-bottom: 22px; }
+.tab {
+  flex: 1; padding: 12px; border-radius: var(--r); font-family: inherit;
+  font-size: 14px; font-weight: 700; cursor: pointer; transition: all .22s;
+  background: var(--glass); border: 1px solid var(--line); color: var(--silver-2);
+}
+.tab.on {
+  background: linear-gradient(135deg, var(--azure), var(--azure-lt));
+  color: var(--court); border-color: transparent;
+  box-shadow: 0 5px 18px rgba(56,189,248,.28);
+}
+.panel { display: none; }
+.panel.on { display: block; animation: fade .3s ease; }
+@keyframes fade { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform:none; } }
+
+/* ══ STATS ══ */
+.stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 22px; }
+.stat {
+  background: var(--glass); border: 1px solid var(--line);
+  border-radius: var(--r); padding: 14px 10px; text-align: center;
+}
+.stat-v { font-size: 24px; font-weight: 900; color: var(--azure-lt); }
+.stat-l { font-size: 11px; color: var(--silver); margin-top: 2px; }
+
+/* ══ FORM ══ */
+.card {
+  background: var(--glass); border: 1px solid var(--line);
+  border-radius: 20px; padding: 24px; margin-bottom: 18px;
+}
+.sec-title {
+  font-size: 14px; font-weight: 800; color: var(--orange-lt);
+  margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; gap: 8px;
+}
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.fld { margin-bottom: 13px; }
+.fld label {
+  display: block; font-size: 12px; color: var(--silver-2);
+  margin-bottom: 6px; font-weight: 500;
+}
+.fld label .req { color: var(--orange); }
+.fld input, .fld select, .fld textarea {
+  width: 100%; padding: 11px 13px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--line-2);
+  border-radius: 11px; color: var(--ice); font-family: inherit; font-size: 13.5px;
+  transition: all .18s; outline: none;
+}
+.fld input::placeholder, .fld textarea::placeholder { color: var(--silver); opacity: .55; }
+.fld input:focus, .fld select:focus, .fld textarea:focus {
+  border-color: var(--azure); background: rgba(255,255,255,0.07);
+  box-shadow: 0 0 0 3px rgba(56,189,248,.14);
+}
+.fld select option { background: var(--court-2); color: var(--ice); }
+.fld textarea { resize: vertical; min-height: 62px; }
+.fld.bad input, .fld.bad select { border-color: var(--red); }
+.hint { font-size: 11px; color: var(--silver); margin-top: 4px; }
+
+/* pills */
+.pills { display: flex; gap: 7px; flex-wrap: wrap; }
+.pill {
+  padding: 8px 15px; border-radius: var(--r-pill); font-size: 12.5px;
+  border: 1px solid var(--line-2); background: rgba(255,255,255,0.04);
+  color: var(--silver-2); cursor: pointer; transition: all .18s; user-select: none;
+}
+.pill:hover { background: var(--glass-2); }
+.pill.on {
+  background: linear-gradient(135deg, var(--orange), var(--orange-lt));
+  color: #fff; border-color: transparent; font-weight: 700;
+}
+
+/* talent toggle */
+.talent-box {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255,107,53,.08); border: 1px solid rgba(255,107,53,.28);
+  border-radius: var(--r); padding: 14px; cursor: pointer; transition: all .2s;
+}
+.talent-box.on { background: rgba(255,107,53,.16); border-color: var(--orange); }
+.talent-check {
+  width: 22px; height: 22px; border-radius: 7px; flex-shrink: 0;
+  border: 2px solid var(--line-2); display: flex; align-items: center;
+  justify-content: center; font-size: 13px; transition: all .2s;
+}
+.talent-box.on .talent-check { background: var(--orange); border-color: var(--orange); color: #fff; }
+.talent-txt { font-size: 13px; font-weight: 700; }
+.talent-sub { font-size: 11px; color: var(--silver); }
+
+/* buttons */
+.btn {
+  padding: 14px; border-radius: var(--r-pill); border: none;
+  font-family: inherit; font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: all .22s; width: 100%;
+}
+.btn-save {
+  background: linear-gradient(135deg, var(--orange), var(--orange-lt)); color: #fff;
+  box-shadow: 0 5px 20px rgba(255,107,53,.3);
+}
+.btn-save:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,107,53,.4); }
+.btn-save:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+.btn-ghost {
+  background: var(--glass); color: var(--ice); border: 1px solid var(--line-2);
+}
+.btn-login {
+  background: linear-gradient(135deg, var(--azure), var(--azure-lt)); color: var(--court);
+}
+
+/* ══ LIST ══ */
+.search-row { display: flex; gap: 10px; margin-bottom: 16px; }
+.search-row input { flex: 1; }
+.st-item {
+  background: var(--glass); border: 1px solid var(--line);
+  border-radius: var(--r); padding: 15px; margin-bottom: 10px;
+  transition: all .2s; cursor: pointer;
+}
+.st-item:hover { border-color: var(--azure); background: var(--glass-2); }
+.st-head { display: flex; align-items: center; gap: 12px; }
+.st-av {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--court-3), var(--azure));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 16px;
+}
+.st-name { font-size: 14.5px; font-weight: 700; }
+.st-meta { font-size: 11.5px; color: var(--silver); }
+.st-id {
+  font-size: 11px; color: var(--azure-lt); background: rgba(56,189,248,.12);
+  padding: 3px 9px; border-radius: var(--r-pill); direction: ltr;
+}
+.st-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 9px; }
+.bdg {
+  font-size: 10.5px; padding: 3px 9px; border-radius: var(--r-pill);
+  background: var(--glass-2); border: 1px solid var(--line); color: var(--silver-2);
+}
+.bdg.talent { background: rgba(255,107,53,.15); border-color: rgba(255,107,53,.3); color: var(--orange-lt); }
+.bdg.active { background: rgba(52,199,123,.14); border-color: rgba(52,199,123,.3); color: var(--green); }
+.st-detail {
+  display: none; margin-top: 14px; padding-top: 14px;
+  border-top: 1px solid var(--line); font-size: 12.5px;
+}
+.st-item.open .st-detail { display: block; }
+.dt-row { display: flex; padding: 5px 0; gap: 10px; }
+.dt-k { color: var(--silver); min-width: 120px; }
+.dt-v { color: var(--ice); flex: 1; }
+
+.empty { text-align: center; padding: 48px 20px; color: var(--silver); }
+.empty-ic { font-size: 40px; margin-bottom: 12px; }
+
+/* toast */
+.toast {
+  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(120px);
+  padding: 13px 26px; border-radius: var(--r-pill); font-size: 13.5px; font-weight: 600;
+  z-index: 500; transition: transform .3s; box-shadow: 0 8px 26px rgba(0,0,0,.45);
+  max-width: 90vw; text-align: center;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.ok { background: var(--green); color: #04241a; }
+.toast.err { background: var(--red); color: #fff; }
+
+.spin {
+  width: 26px; height: 26px; border: 3px solid var(--line);
+  border-top-color: var(--azure); border-radius: 50%;
+  margin: 30px auto; animation: sp .7s linear infinite;
+}
+@keyframes sp { to { transform: rotate(360deg); } }
+
+@media (max-width: 640px) {
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .wrap { padding: 16px 14px 70px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="gate">
+  <div class="gate-card">
+    <div style="font-size:40px;margin-bottom:10px">🎾</div>
+    <h1>پرونده هنرجویان</h1>
+    <p>برای ورود، نام کاربری و رمز خود را وارد کنید</p>
+    <div class="fld"><label>نام کاربری</label>
+      <input id="g-user" type="text" dir="ltr" style="text-align:left" placeholder="admin"></div>
+    <div class="fld" style="margin-bottom:20px"><label>رمز عبور</label>
+      <input id="g-pass" type="password" dir="ltr" style="text-align:left" placeholder="••••••••"
+        onkeydown="if(event.key==='Enter')login()"></div>
+    <button class="btn btn-login" onclick="login()">ورود</button>
+    <div id="g-err" style="font-size:12px;color:var(--red);margin-top:12px;min-height:16px"></div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div class="wrap" id="app" style="display:none">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-y">Y</div>
+      <div class="brand-t">پرونده هنرجویان<small>آکادمی تنیس وای</small></div>
+    </div>
+    <button class="btn-out" onclick="logout()">خروج</button>
+  </div>
+
+  <div class="stats" id="stats">
+    <div class="stat"><div class="stat-v" id="s-total">—</div><div class="stat-l">کل هنرجویان</div></div>
+    <div class="stat"><div class="stat-v" id="s-active">—</div><div class="stat-l">فعال</div></div>
+    <div class="stat"><div class="stat-v" id="s-talent">—</div><div class="stat-l">کاندید مسابقات</div></div>
+    <div class="stat"><div class="stat-v" id="s-branch">—</div><div class="stat-l">شعبه فعال</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" id="tab-add" onclick="tab('add')">➕ ثبت هنرجو</button>
+    <button class="tab" id="tab-list" onclick="tab('list')">📋 لیست هنرجویان</button>
+  </div>
+
+  <!-- ══════ ثبت ══════ -->
+  <div class="panel on" id="p-add">
+
+    <div class="card">
+      <div class="sec-title">👤 اطلاعات شخصی</div>
+      <div class="fld" id="f-name">
+        <label>نام و نام خانوادگی <span class="req">*</span></label>
+        <input id="fullName" type="text" placeholder="مثال: علی رضایی">
+      </div>
+      <div class="grid2">
+        <div class="fld">
+          <label>تاریخ تولد</label>
+          <input id="birthDate" type="text" placeholder="۱۳۹۰/۰۵/۱۲" maxlength="10" oninput="dateFmt(this)">
+          <div class="hint" id="age-hint"></div>
+        </div>
+        <div class="fld">
+          <label>جنسیت</label>
+          <div class="pills" data-f="gender">
+            <div class="pill" data-v="مرد">مرد</div>
+            <div class="pill" data-v="زن">زن</div>
+          </div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="fld"><label>موبایل هنرجو</label>
+          <input id="phone" type="tel" dir="ltr" style="text-align:right" placeholder="۰۹xxxxxxxxx" maxlength="11"></div>
+        <div class="fld"><label>موبایل والدین</label>
+          <input id="parentPhone" type="tel" dir="ltr" style="text-align:right" placeholder="برای زیر ۱۸ سال" maxlength="11"></div>
+      </div>
+      <div class="fld"><label>تماس اضطراری</label>
+        <input id="emergencyContact" type="text" placeholder="نام و شماره — مثال: مادر ۰۹۱۲۳۴۵۶۷۸۹">
+        <div class="hint">در صورت بروز حادثه در زمین ضروری است</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sec-title">🏫 وضعیت در آکادمی</div>
+      <div class="grid2">
+        <div class="fld" id="f-branch">
+          <label>شعبه <span class="req">*</span></label>
+          <select id="branch">
+            <option value="">— انتخاب کنید —</option>
+            <option>قائمشهر</option><option>ساری</option><option>تهران</option>
+          </select>
+        </div>
+        <div class="fld"><label>مربی مسئول</label>
+          <select id="coach">
+            <option value="">— انتخاب کنید —</option>
+            <option>محمدحسین صابرقدیم</option>
+            <option>تینا صابرقدیم</option>
+            <option>ارمین دارایی</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="fld"><label>تاریخ ورود به آکادمی</label>
+          <input id="entryDate" type="text" placeholder="۱۴۰۴/۰۲/۱۵" maxlength="10" oninput="dateFmt(this)"></div>
+        <div class="fld"><label>وضعیت</label>
+          <select id="status">
+            <option>فعال</option><option>موقتاً متوقف</option><option>انصراف داده</option>
+          </select>
+        </div>
+      </div>
+      <div class="fld"><label>نوع کلاس</label>
+        <div class="pills" data-f="classType">
+          <div class="pill" data-v="خصوصی">خصوصی</div>
+          <div class="pill" data-v="گروهی">گروهی</div>
+          <div class="pill" data-v="گروهی ترمی">گروهی ترمی</div>
+        </div>
+      </div>
+      <div class="fld"><label>سابقه حضور در آکادمی</label>
+        <input id="academyHistory" type="text" placeholder="مثال: هنرجوی جدید — یا: از ۱۴۰۲، ۳ ترم گذرانده">
+        <div class="hint">اگر قبلاً پیش ما بوده، مدت و تعداد ترم را بنویسید</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sec-title">🎾 سابقه ورزشی و مشخصات فنی</div>
+      <div class="fld"><label>سابقه تنیس پیش از آکادمی</label>
+        <input id="tennisHistory" type="text" placeholder="مثال: مبتدی کامل — یا: ۲ سال در باشگاه دیگر"></div>
+      <div class="fld"><label>سابقه ورزشی دیگر</label>
+        <input id="otherSports" type="text" placeholder="مثال: ۴ سال شنا، ۱ سال بدمینتون">
+        <div class="hint">مهارت‌های قابل انتقال از ورزش دیگر، سرعت یادگیری را بالا می‌برد</div></div>
+      <div class="grid3">
+        <div class="fld"><label>دست برتر</label>
+          <div class="pills" data-f="dominantHand">
+            <div class="pill" data-v="راست">راست</div>
+            <div class="pill" data-v="چپ">چپ</div>
+          </div>
+        </div>
+        <div class="fld"><label>نوع بک‌هند</label>
+          <div class="pills" data-f="backhandType">
+            <div class="pill" data-v="یک‌دست">یک‌دست</div>
+            <div class="pill" data-v="دودست">دودست</div>
+          </div>
+        </div>
+        <div class="fld"><label>سطح فعلی</label>
+          <select id="level">
+            <option value="">—</option>
+            <option>مبتدی</option><option>متوسط</option>
+            <option>پیشرفته</option><option>رقابتی</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sec-title">🩺 سلامت و ایمنی</div>
+      <div class="fld"><label>سابقه مصدومیت</label>
+        <textarea id="injuryHistory" placeholder="نوع مصدومیت، تاریخ، وضعیت فعلی (بهبودیافته / در حال درمان)"></textarea></div>
+      <div class="fld"><label>نکات پزشکی و حساسیت‌ها</label>
+        <textarea id="medicalNotes" placeholder="آسم، حساسیت دارویی یا غذایی، دارو مصرفی، محدودیت حرکتی..."></textarea></div>
+    </div>
+
+    <div class="card">
+      <div class="sec-title">🎯 هدف و موارد تکمیلی</div>
+      <div class="fld"><label>هدف از تمرین</label>
+        <div class="pills" data-f="goal">
+          <div class="pill" data-v="تفریح و سرگرمی">تفریح و سرگرمی</div>
+          <div class="pill" data-v="تناسب اندام">تناسب اندام</div>
+          <div class="pill" data-v="یادگیری حرفه‌ای">یادگیری حرفه‌ای</div>
+          <div class="pill" data-v="آمادگی مسابقات">آمادگی مسابقات</div>
+        </div>
+      </div>
+
+      <div class="fld">
+        <label>اجازه انتشار تصویر</label>
+        <div class="pills" data-f="mediaConsent">
+          <div class="pill" data-v="دارد">دارد</div>
+          <div class="pill" data-v="ندارد">ندارد</div>
+          <div class="pill" data-v="پرسیده نشده">پرسیده نشده</div>
+        </div>
+        <div class="hint">طبق منشور آکادمی، انتشار تصویر هنرجو نیاز به رضایت دارد</div>
+      </div>
+
+      <div class="fld"><label>نحوه آشنایی با آکادمی</label>
+        <select id="howHeard">
+          <option value="">—</option>
+          <option>اینستاگرام</option><option>معرفی دوستان و آشنایان</option>
+          <option>جستجوی اینترنتی</option><option>تابلو یا بنر شعبه</option><option>سایر</option>
+        </select>
+        <div class="hint">به شما نشان می‌دهد کدام کانال جذب واقعاً کار می‌کند</div></div>
+
+      <div class="grid2">
+        <div class="fld"><label>تاریخ آخرین ارزیابی</label>
+          <input id="lastAssessment" type="text" placeholder="۱۴۰۴/۰۲/۱۵" maxlength="10" oninput="dateFmt(this)"></div>
+        <div class="fld"><label>یادداشت آزاد</label>
+          <input id="note" type="text" placeholder="هر نکته‌ای که لازم است ثبت شود"></div>
+      </div>
+
+      <div class="talent-box" id="talent-box" onclick="toggleTalent()" style="margin-top:6px">
+        <div class="talent-check">✓</div>
+        <div>
+          <div class="talent-txt">کاندید مسابقات — مسیر رقابتی</div>
+          <div class="talent-sub">برای هنرجویان مستعدی که در حال آماده‌سازی برای مسابقه‌اند</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-save" id="btn-save" onclick="save()">💾 ثبت پرونده هنرجو</button>
+  </div>
+
+  <!-- ══════ لیست ══════ -->
+  <div class="panel" id="p-list">
+    <div class="search-row">
+      <div class="fld" style="flex:1;margin:0">
+        <input id="q" type="text" placeholder="🔍 جستجو: نام، کد، شعبه، مربی..." oninput="renderList()">
+      </div>
+      <button class="btn btn-ghost" style="width:auto;padding:11px 20px;font-size:13px" onclick="loadAll()">🔄</button>
+    </div>
+    <div id="list-body"><div class="spin"></div></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// ⚠️  آدرس API بک‌اند پرونده هنرجویان را اینجا بگذارید
+// (این با آدرس داشبورد مالی متفاوت است)
+// ═══════════════════════════════════════════════
+var API = 'https://script.google.com/macros/s/AKfycbwPhEQVUqfkgF4Twk2EyD_WgQ35j2-a3owt-eUY2qXnE-uUAIMtYNQMR7yP87wBRqdBaw/exec';
+
+// ── ورود (احراز هویت سمت سرور — رمزها در فایل نیستند) ──
+var TOKEN = '';
+try { TOKEN = sessionStorage.getItem('yt_st_token') || ''; } catch(e){}
+
+function login() {
+  var u = (document.getElementById('g-user').value||'').trim().toLowerCase();
+  var p = document.getElementById('g-pass').value||'';
+  var btn = document.getElementById('g-btn');
+  document.getElementById('g-err').textContent = '';
+  if (!u || !p) { document.getElementById('g-err').textContent = 'نام کاربری و رمز را وارد کنید'; return; }
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ در حال ورود...'; }
+  fetch(API, { method:'POST', headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify({ action:'panel_login', username:u, password:p }) })
+  .then(function(r){ return r.json(); })
+  .then(function(j){
+    if (btn) { btn.disabled = false; btn.textContent = 'ورود'; }
+    if (j.success && j.data && j.data.token) {
+      TOKEN = j.data.token;
+      try {
+        sessionStorage.setItem('yt_st_token', TOKEN);
+        sessionStorage.setItem('yt_st_name', j.data.name||'');
+        sessionStorage.setItem('yt_st_role', j.data.role||'');
+      } catch(e){}
+      document.getElementById('gate').style.display='none';
+      document.getElementById('app').style.display='';
+      loadAll();
+    } else {
+      document.getElementById('g-err').textContent = '❌ ' + (j.error || 'نام کاربری یا رمز اشتباه است');
+      document.getElementById('g-pass').value='';
+    }
+  })
+  .catch(function(){
+    if (btn) { btn.disabled = false; btn.textContent = 'ورود'; }
+    document.getElementById('g-err').textContent = 'اتصال برقرار نشد، دوباره تلاش کنید';
+  });
+}
+function logout(){
+  try {
+    sessionStorage.removeItem('yt_st_token');
+    sessionStorage.removeItem('yt_st_name');
+    sessionStorage.removeItem('yt_st_role');
+  } catch(e){}
+  location.reload();
+}
+(function(){
+  if (TOKEN) {
+    document.getElementById('gate').style.display='none';
+    document.getElementById('app').style.display='';
+    loadAll();
+  }
+})();
+
+// ── داده فرم ──
+var F = { gender:'', classType:'', dominantHand:'', backhandType:'', goal:'', mediaConsent:'', talentFlag:'خیر' };
+
+document.querySelectorAll('.pills').forEach(function(g){
+  var f = g.dataset.f;
+  g.querySelectorAll('.pill').forEach(function(pl){
+    pl.addEventListener('click', function(){
+      g.querySelectorAll('.pill').forEach(function(x){ x.classList.remove('on'); });
+      pl.classList.add('on');
+      F[f] = pl.dataset.v;
+    });
+  });
+});
+
+function toggleTalent(){
+  var b = document.getElementById('talent-box');
+  b.classList.toggle('on');
+  F.talentFlag = b.classList.contains('on') ? 'بله' : 'خیر';
+}
+
+// ── فرمت تاریخ با اسلش خودکار ──
+function dateFmt(el){
+  var v = el.value.replace(/[^0-9]/g,'');
+  if (v.length >= 5) v = v.slice(0,4)+'/'+v.slice(4);
+  if (v.length >= 8) v = v.slice(0,7)+'/'+v.slice(7,9);
+  el.value = v;
+  if (el.id === 'birthDate') showAge(v);
+}
+function showAge(v){
+  var h = document.getElementById('age-hint');
+  var m = v.match(/^(\d{4})\//);
+  if (m) {
+    var y = parseInt(m[1],10);
+    if (y > 1300 && y < 1450) { h.textContent = 'سن تقریبی: ' + (1404 - y) + ' سال'; return; }
+  }
+  h.textContent = '';
+}
+
+// ── تب ──
+function tab(t){
+  document.getElementById('tab-add').classList.toggle('on', t==='add');
+  document.getElementById('tab-list').classList.toggle('on', t==='list');
+  document.getElementById('p-add').classList.toggle('on', t==='add');
+  document.getElementById('p-list').classList.toggle('on', t==='list');
+}
+
+// ── ذخیره ──
+function save(){
+  var nameEl = document.getElementById('fullName');
+  var brEl = document.getElementById('branch');
+  document.getElementById('f-name').classList.remove('bad');
+  document.getElementById('f-branch').classList.remove('bad');
+  var ok = true;
+  if (nameEl.value.trim().length < 3) { document.getElementById('f-name').classList.add('bad'); ok=false; }
+  if (!brEl.value) { document.getElementById('f-branch').classList.add('bad'); ok=false; }
+  if (!ok) { toast('نام و شعبه الزامی است','err'); window.scrollTo({top:0,behavior:'smooth'}); return; }
+
+  if (API.indexOf('PASTE_YOUR') === 0) { toast('اول آدرس API را در کد قرار دهید','err'); return; }
+
+  var btn = document.getElementById('btn-save');
+  btn.disabled = true; btn.textContent = '⏳ در حال ذخیره...';
+
+  var payload = {
+    module: 'students_info',
+    token: TOKEN,
+    mode: 'add',
+    fullName: nameEl.value.trim(),
+    birthDate: g('birthDate'), gender: F.gender,
+    phone: g('phone'), parentPhone: g('parentPhone'),
+    emergencyContact: g('emergencyContact'),
+    branch: brEl.value, coach: g('coach'),
+    entryDate: g('entryDate'), classType: F.classType,
+    status: g('status'), academyHistory: g('academyHistory'),
+    tennisHistory: g('tennisHistory'), otherSports: g('otherSports'),
+    dominantHand: F.dominantHand, backhandType: F.backhandType,
+    level: g('level'), goal: F.goal,
+    injuryHistory: g('injuryHistory'), medicalNotes: g('medicalNotes'),
+    mediaConsent: F.mediaConsent, talentFlag: F.talentFlag,
+    howHeard: g('howHeard'), lastAssessment: g('lastAssessment'), note: g('note')
+  };
+
+  fetch(API, { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(payload), mode:'no-cors' })
+  .then(function(){
+    toast('✅ پرونده «'+payload.fullName+'» ثبت شد','ok');
+    clearForm();
+    btn.disabled=false; btn.textContent='💾 ثبت پرونده هنرجو';
+    setTimeout(loadAll, 1200);
+    window.scrollTo({top:0,behavior:'smooth'});
+  })
+  .catch(function(){
+    toast('مشکلی در ذخیره پیش آمد','err');
+    btn.disabled=false; btn.textContent='💾 ثبت پرونده هنرجو';
+  });
+}
+function g(id){ var e=document.getElementById(id); return e ? (e.value||'').trim() : ''; }
+
+function clearForm(){
+  ['fullName','birthDate','phone','parentPhone','emergencyContact','coach','entryDate',
+   'academyHistory','tennisHistory','otherSports','level','injuryHistory','medicalNotes',
+   'howHeard','lastAssessment','note'].forEach(function(id){
+    var e=document.getElementById(id); if(e) e.value='';
+  });
+  document.getElementById('branch').value='';
+  document.getElementById('status').value='فعال';
+  document.querySelectorAll('.pill').forEach(function(p){ p.classList.remove('on'); });
+  document.getElementById('talent-box').classList.remove('on');
+  document.getElementById('age-hint').textContent='';
+  F = { gender:'', classType:'', dominantHand:'', backhandType:'', goal:'', mediaConsent:'', talentFlag:'خیر' };
+}
+
+// ── بارگذاری ──
+var DATA = [];
+function loadAll(){
+  if (API.indexOf('PASTE_YOUR') === 0) {
+    document.getElementById('list-body').innerHTML =
+      '<div class="empty"><div class="empty-ic">⚙️</div><p>اول آدرس API را در کد قرار دهید</p></div>';
+    return;
+  }
+  document.getElementById('list-body').innerHTML = '<div class="spin"></div>';
+  fetch(API + '?action=students_info&token=' + encodeURIComponent(TOKEN))
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      DATA = (j.success && j.data) ? j.data : [];
+      stats(); renderList();
+    })
+    .catch(function(){
+      document.getElementById('list-body').innerHTML =
+        '<div class="empty"><div class="empty-ic">⚠️</div><p>اتصال برقرار نشد</p></div>';
+    });
+}
+
+function stats(){
+  var act = DATA.filter(function(s){ return s.status === 'فعال'; }).length;
+  var tal = DATA.filter(function(s){ return String(s.talentFlag) === 'بله'; }).length;
+  var brs = {};
+  DATA.forEach(function(s){ if(s.branch) brs[s.branch]=1; });
+  document.getElementById('s-total').textContent = DATA.length;
+  document.getElementById('s-active').textContent = act;
+  document.getElementById('s-talent').textContent = tal;
+  document.getElementById('s-branch').textContent = Object.keys(brs).length;
+}
+
+function renderList(){
+  var q = (document.getElementById('q').value||'').trim().toLowerCase();
+  var rows = DATA.filter(function(s){
+    if (!q) return true;
+    return [s.fullName,s.studentId,s.branch,s.coach,s.level,s.classType]
+      .join(' ').toLowerCase().indexOf(q) !== -1;
+  });
+  var body = document.getElementById('list-body');
+  if (!rows.length) {
+    body.innerHTML = '<div class="empty"><div class="empty-ic">🎾</div><p>'+
+      (DATA.length ? 'موردی یافت نشد' : 'هنوز هنرجویی ثبت نشده — از تب «ثبت هنرجو» شروع کنید')+'</p></div>';
+    return;
+  }
+  body.innerHTML = rows.map(function(s,i){
+    var nm = s.fullName || '—';
+    var bd = [];
+    if (String(s.talentFlag)==='بله') bd.push('<span class="bdg talent">🏆 کاندید مسابقات</span>');
+    if (s.status==='فعال') bd.push('<span class="bdg active">فعال</span>');
+    else if (s.status) bd.push('<span class="bdg">'+esc(s.status)+'</span>');
+    if (s.classType) bd.push('<span class="bdg">'+esc(s.classType)+'</span>');
+    if (s.level) bd.push('<span class="bdg">'+esc(s.level)+'</span>');
+
+    var d = [
+      ['تاریخ تولد', s.birthDate], ['جنسیت', s.gender],
+      ['موبایل', s.phone], ['موبایل والدین', s.parentPhone],
+      ['تماس اضطراری', s.emergencyContact],
+      ['تاریخ ورود', s.entryDate], ['سابقه در آکادمی', s.academyHistory],
+      ['سابقه تنیس', s.tennisHistory], ['ورزش دیگر', s.otherSports],
+      ['دست برتر', s.dominantHand], ['بک‌هند', s.backhandType],
+      ['هدف', s.goal], ['سابقه مصدومیت', s.injuryHistory],
+      ['نکات پزشکی', s.medicalNotes], ['اجازه تصویر', s.mediaConsent],
+      ['نحوه آشنایی', s.howHeard], ['آخرین ارزیابی', s.lastAssessment],
+      ['یادداشت', s.note]
+    ].filter(function(x){ return x[1]; })
+     .map(function(x){ return '<div class="dt-row"><div class="dt-k">'+x[0]+'</div><div class="dt-v">'+esc(x[1])+'</div></div>'; })
+     .join('');
+
+    return '<div class="st-item" onclick="this.classList.toggle(\'open\')">'+
+      '<div class="st-head">'+
+        '<div class="st-av">'+esc(nm.charAt(0))+'</div>'+
+        '<div style="flex:1">'+
+          '<div class="st-name">'+esc(nm)+'</div>'+
+          '<div class="st-meta">'+esc(s.branch||'—')+(s.coach?' · '+esc(s.coach):'')+'</div>'+
+        '</div>'+
+        '<div class="st-id">'+esc(s.studentId||'—')+'</div>'+
+      '</div>'+
+      (bd.length ? '<div class="st-badges">'+bd.join('')+'</div>' : '')+
+      (d ? '<div class="st-detail">'+d+'</div>' : '')+
+    '</div>';
+  }).join('');
+}
+
+function esc(s){ var d=document.createElement('div'); d.textContent = s==null?'':String(s); return d.innerHTML; }
+
+function toast(m,t){
+  var el=document.getElementById('toast');
+  el.textContent=m; el.className='toast show '+(t||'ok');
+  setTimeout(function(){ el.classList.remove('show'); }, 3200);
+}
+</script>
+</body>
+</html>
