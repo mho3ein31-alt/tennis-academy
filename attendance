@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EDF0E8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="پنل آکادمی">
+<title>پنل آکادمی تنیس Y</title>
+<style>
+@import url('https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/Vazirmatn-font-face.css');
+
+:root{
+  --bg:#EDF0E8; --surface:#FFFFFF; --ink:#10333A; --muted:#6B8288;
+  --line:#DCE1D6; --ball:#C9DE22; --ball-deep:#A7BC0F;
+  --teal:#17685F; --teal-dark:#0F4B44; --clay:#BE5733;
+  --radius:16px; --shadow:0 1px 2px rgba(16,51,58,.06), 0 8px 24px rgba(16,51,58,.06);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);
+  font-family:Vazirmatn,Vazir,'IRANSans','IRANYekan',Tahoma,system-ui,sans-serif;
+  font-size:15px;line-height:1.75;padding-bottom:100px}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+.wrap{max-width:640px;margin:0 auto;padding:0 14px}
+
+header{padding:22px 0 10px}
+.eyebrow{font-size:11px;letter-spacing:.14em;color:var(--muted);display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.eyebrow::after{content:"";flex:1;height:1px;background:var(--line)}
+h1{margin:0;font-size:25px;font-weight:800;letter-spacing:-.01em}
+.sync{font-size:11px;color:var(--muted);height:16px;margin-top:2px}
+
+.tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);
+  border-radius:13px;padding:4px;margin:12px 0 16px}
+.tabs button{flex:1;border-radius:10px;padding:9px;font-size:13.5px;font-weight:600;color:var(--muted)}
+.tabs button.on{background:var(--ink);color:#fff}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:11px 12px}
+.stat b{display:block;font-size:23px;font-weight:800;line-height:1.2}
+.stat span{font-size:11px;color:var(--muted)}
+.stat.alert b{color:var(--clay)}
+
+.toolbar{display:flex;gap:8px;margin-bottom:10px}
+.search{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 13px;outline:none}
+.search:focus{border-color:var(--teal)}
+.icon-btn{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 14px;font-size:13px;color:var(--muted)}
+.chips{display:flex;gap:7px;margin-bottom:16px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 13px;font-size:12.5px;color:var(--muted)}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.card.done{border-color:var(--clay)}
+.card-top{display:flex;align-items:flex-start;gap:10px}
+.who{flex:1;min-width:0;text-align:right}
+.name{font-size:17px;font-weight:700;display:block}
+.meta{font-size:12px;color:var(--muted);margin-top:1px}
+.tag{display:inline-block;font-size:10.5px;padding:1px 7px;border-radius:6px;background:var(--bg);color:var(--muted);margin-inline-start:5px;vertical-align:1px}
+.tag.today{background:var(--ball);color:var(--teal-dark);font-weight:700}
+.tag.term{background:#E7EFEE;color:var(--teal)}
+.remain{text-align:center;min-width:56px}
+.remain b{display:block;font-size:30px;font-weight:800;line-height:1}
+.remain span{font-size:10px;color:var(--muted)}
+.remain.zero b{color:var(--clay)}
+.remain.low b{color:var(--ball-deep)}
+
+.balls{display:flex;gap:5px;flex-wrap:wrap;margin:13px 0 12px}
+.ball{width:15px;height:15px;border-radius:50%;border:1.5px dashed var(--line);position:relative}
+.ball.on{background:var(--ball);border:1.5px solid var(--ball-deep)}
+.ball.on::after{content:"";position:absolute;inset:2px 4px;border-radius:50%;
+  border-inline-start:1.5px solid rgba(255,255,255,.75);border-inline-end:1.5px solid rgba(255,255,255,.75)}
+.bar{height:9px;background:var(--bg);border:1px solid var(--line);border-radius:99px;margin:13px 0 12px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ball);border-radius:99px}
+
+.card-actions{display:flex;gap:8px}
+.btn{border-radius:11px;padding:9px 14px;font-size:13.5px;font-weight:600;border:1px solid transparent}
+.btn-main{background:var(--teal);color:#fff;flex:1}
+.btn-main:active{background:var(--teal-dark)}
+.btn-ghost{background:var(--surface);border-color:var(--line);color:var(--muted)}
+.btn-clay{background:var(--clay);color:#fff;flex:1}
+.btn-dark{background:var(--ink);color:#fff;flex:1}
+
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:var(--radius);padding:34px 20px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--ink);font-size:17px;margin-bottom:6px}
+
+.fab{position:fixed;inset-inline-start:50%;transform:translateX(50%);bottom:20px;
+  background:var(--ink);color:#fff;border-radius:999px;padding:13px 24px;font-weight:700;font-size:14.5px;
+  box-shadow:0 10px 26px rgba(16,51,58,.28);z-index:40}
+
+/* ---- بخش مالی ---- */
+.ledger{background:var(--ink);color:#fff;border-radius:20px;padding:18px;margin-bottom:12px;position:relative;overflow:hidden}
+.ledger::after{content:"";position:absolute;inset-block:0;inset-inline-end:-40px;width:120px;
+  background:radial-gradient(circle at 50% 50%, rgba(201,222,34,.16), transparent 62%)}
+.ledger .period{font-size:11.5px;color:#9DB6B7;letter-spacing:.03em}
+.ledger .dir{font-size:13px;color:#CDE0DC;margin-top:10px}
+.ledger .amt{font-size:34px;font-weight:800;line-height:1.2;letter-spacing:-.02em}
+.ledger .amt small{font-size:14px;font-weight:600;color:#9DB6B7;margin-inline-start:5px}
+.ledger .amt.pos{color:var(--ball)}
+.ledger .amt.neg{color:#F0A88C}
+.ledger .split{display:flex;gap:10px;margin-top:15px;position:relative;z-index:1}
+.ledger .split div{flex:1;background:rgba(255,255,255,.07);border-radius:12px;padding:9px 11px}
+.ledger .split b{display:block;font-size:15px;font-weight:700}
+.ledger .split span{font-size:10.5px;color:#9DB6B7}
+.ledger .due{margin-top:14px;font-size:12px;color:#9DB6B7;border-top:1px solid rgba(255,255,255,.12);padding-top:11px;position:relative;z-index:1}
+
+.entry{display:flex;align-items:center;gap:11px;background:var(--surface);border:1px solid var(--line);
+  border-radius:13px;padding:11px 13px;margin-bottom:7px}
+.entry .k{width:5px;align-self:stretch;border-radius:99px;flex:none}
+.entry .k.teach{background:var(--ball)}
+.entry .k.rent{background:var(--clay)}
+.entry .d{flex:1;min-width:0}
+.entry .d b{font-size:14px;font-weight:600;display:block}
+.entry .d small{color:var(--muted);font-size:11.5px}
+.entry .v{font-size:14px;font-weight:700;white-space:nowrap}
+.entry .v.rent{color:var(--clay)}
+.entry .x{color:var(--muted);font-size:17px;padding:0 2px}
+
+.hist{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:11px 13px;margin-bottom:7px;font-size:12.5px}
+.hist b{font-size:14px}
+.hist small{display:block;color:var(--muted);font-size:11.5px}
+
+/* ---- شیت ---- */
+.scrim{position:fixed;inset:0;background:rgba(16,51,58,.42);z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;inset-inline:0;bottom:0;z-index:60;background:var(--bg);border-radius:22px 22px 0 0;
+  max-height:92vh;overflow-y:auto;transform:translateY(100%);transition:transform .26s cubic-bezier(.3,.9,.3,1);
+  max-width:640px;margin:0 auto}
+.sheet.on{transform:translateY(0)}
+.sheet-in{padding:8px 16px 30px}
+.grab{width:42px;height:4px;background:var(--line);border-radius:9px;margin:8px auto 12px}
+.sheet h2{margin:0 0 2px;font-size:21px;font-weight:800}
+.sheet h3{margin:20px 0 8px;font-size:13px;color:var(--muted);font-weight:600}
+label{display:block;font-size:12.5px;color:var(--muted);margin:12px 0 5px}
+input[type=text],input[type=number],input[type=date],input[type=time],select,textarea{
+  width:100%;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:10px 12px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--teal)}
+.row{display:flex;gap:9px}
+.row>*{flex:1}
+.daychips{display:flex;gap:6px;flex-wrap:wrap}
+.daychip{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:7px 10px;font-size:12.5px;color:var(--muted)}
+.daychip.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+.sess{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);
+  border-radius:12px;padding:9px 12px;margin-bottom:7px}
+.sess .n{width:26px;height:26px;border-radius:50%;background:var(--ball);display:flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:700;color:var(--teal-dark);flex:none}
+.sess .d{flex:1;font-size:13.5px}
+.sess .d small{display:block;color:var(--muted);font-size:11.5px}
+.sess .x{color:var(--muted);font-size:17px;padding:0 4px}
+.note{background:#FBF3EE;border:1px solid #EFD9CC;color:#8A4425;border-radius:11px;padding:10px 12px;font-size:12.5px}
+.past{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:9px 12px;font-size:12.5px;color:var(--muted);margin-bottom:6px}
+
+.toast{position:fixed;inset-inline:0;bottom:22px;z-index:80;display:flex;justify-content:center;pointer-events:none;opacity:0;transition:opacity .2s}
+.toast.on{opacity:1}
+.toast div{background:var(--ink);color:#fff;border-radius:999px;padding:11px 18px;font-size:13.5px;
+  display:flex;align-items:center;gap:14px;pointer-events:auto;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.toast button{color:var(--ball);font-weight:700;font-size:13.5px}
+.ask{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:rgba(16,51,58,.45);padding:20px}
+.ask.on{display:flex}
+.ask-box{background:var(--surface);border-radius:18px;padding:20px;max-width:340px;width:100%;text-align:center}
+.ask-box p{margin:0 0 16px;font-size:15px}
+
+/* ---- ورود ---- */
+.login{position:fixed;inset:0;z-index:120;background:var(--bg);display:none;align-items:center;justify-content:center;padding:22px}
+.login.on{display:flex}
+.login-box{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:26px 22px;max-width:360px;width:100%;box-shadow:var(--shadow)}
+.login-box h2{margin:0 0 4px;font-size:22px;font-weight:800}
+.login-box p{margin:0;font-size:12.5px;color:var(--muted)}
+.login-err{background:#FBF3EE;border:1px solid #EFD9CC;color:#8A4425;border-radius:11px;padding:9px 12px;font-size:12.5px;margin-top:14px;display:none}
+.login-err.on{display:block}
+.offbar{background:#FBF3EE;border:1px solid #EFD9CC;color:#8A4425;border-radius:11px;padding:9px 12px;font-size:12.5px;margin-bottom:12px;display:none}
+.offbar.on{display:block}
+.sync.err{color:var(--clay)}
+input[type=password]{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:10px 12px;outline:none}
+input[type=password]:focus{border-color:var(--teal)}
+</style>
+</head>
+<body>
+
+<div class="login" id="login"><div class="login-box">
+  <div class="eyebrow">آکادمی تنیس Y</div>
+  <h2>ورود به پنل</h2>
+  <p>اطلاعات روی سرور آکادمی ذخیره می‌شود و بین گوشی و کامپیوتر یکی است.</p>
+  <label>نام کاربری</label><input type="text" id="lg_u" autocomplete="username">
+  <label>رمز عبور</label><input type="password" id="lg_p" autocomplete="current-password">
+  <div class="login-err" id="lg_err"></div>
+  <button class="btn btn-main" style="width:100%;margin-top:18px" id="lg_go">ورود</button>
+</div></div>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">آکادمی تنیس Y</div>
+    <h1 id="title">حضور و غیاب</h1>
+    <div class="sync" id="sync"></div>
+  </header>
+
+  <div class="offbar" id="offbar"></div>
+
+  <div class="tabs">
+    <button class="on" data-tab="att">حضور و غیاب</button>
+    <button data-tab="fin">حساب آکادمی همکار</button>
+  </div>
+
+  <div id="viewAtt">
+    <div class="stats">
+      <div class="stat"><b id="s1">۰</b><span>هنرجوی فعال</span></div>
+      <div class="stat"><b id="s2">۰</b><span>جلسه این هفته</span></div>
+      <div class="stat alert"><b id="s3">۰</b><span>نیازمند تمدید</span></div>
+    </div>
+    <div class="toolbar">
+      <input class="search" id="q" type="text" placeholder="جست‌وجوی نام هنرجو…">
+      <button class="icon-btn" id="backupBtn">پشتیبان</button>
+    </div>
+    <div class="chips" id="chips">
+      <button class="chip on" data-f="all">همه</button>
+      <button class="chip" data-f="low">رو به اتمام</button>
+      <button class="chip" data-f="done">تمام‌شده</button>
+      <button class="chip" data-f="today">کلاس امروز</button>
+      <button class="chip" id="sortBtn">مرتب‌سازی: فوریت</button>
+    </div>
+    <div id="list"></div>
+  </div>
+
+  <div id="viewFin" hidden></div>
+</div>
+
+<button class="fab" id="fab">+ هنرجوی جدید</button>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet"><div class="sheet-in" id="sheetIn"></div></div>
+<div class="toast" id="toast"><div><span id="toastMsg"></span><button id="toastAct" hidden>برگردان</button></div></div>
+<div class="ask" id="ask"><div class="ask-box">
+  <p id="askMsg"></p>
+  <div class="row"><button class="btn btn-ghost" id="askNo">انصراف</button><button class="btn btn-clay" id="askYes">تأیید</button></div>
+</div></div>
+
+<script>
+/* ===================== تاریخ شمسی ===================== */
+const BR=[-61,9,38,199,426,686,756,818,1111,1181,1210,1635,2060,2097,2192,2262,2324,2394,2456,3178];
+const dv=(a,b)=>~~(a/b), md=(a,b)=>a-~~(a/b)*b;
+function jalCal(jy,noLeap){
+  let bl=BR.length,gy=jy+621,leapJ=-14,jp=BR[0],jm,jump,leap,leapG,march,n,i;
+  for(i=1;i<bl;i++){jm=BR[i];jump=jm-jp;if(jy<jm)break;leapJ+=dv(jump,33)*8+dv(md(jump,33),4);jp=jm;}
+  n=jy-jp;leapJ+=dv(n,33)*8+dv(md(n,33)+3,4);
+  if(md(jump,33)===4&&jump-n===4)leapJ++;
+  leapG=dv(gy,4)-dv((dv(gy,100)+1)*3,4)-150;
+  march=20+leapJ-leapG;
+  if(!noLeap){if(jump-n<6)n=n-jump+dv(jump+4,33)*33;leap=md(md(n+1,33)-1,4);if(leap===-1)leap=4;}
+  return{leap,gy,march};
+}
+function g2d(gy,gm,gd){
+  let d=dv((gy+dv(gm-8,6)+100100)*1461,4)+dv(153*md(gm+9,12)+2,5)+gd-34840408;
+  return d-dv(dv(gy+100100+dv(gm-8,6),100)*3,4)+752;
+}
+function d2g(jdn){
+  let j=4*jdn+139361631;
+  j=j+dv(dv(4*jdn+183187720,146097)*3,4)*4-3908;
+  const i=dv(md(j,1461),4)*5+308, gm=md(dv(i,153),12)+1;
+  return{gy:dv(j,1461)-100100+dv(8-gm,6),gm:gm,gd:dv(md(i,153),5)+1};
+}
+function d2j(jdn){
+  const gy=d2g(jdn).gy;let jy=gy-621;const r=jalCal(jy,false),f=g2d(r.gy,3,r.march);
+  let k=jdn-f,jm,jd;
+  if(k>=0){if(k<=185){jm=1+dv(k,31);jd=md(k,31)+1;return{jy,jm,jd};}k-=186;}
+  else{jy--;k+=179;if(r.leap===1)k++;}
+  jm=7+dv(k,30);jd=md(k,30)+1;return{jy,jm,jd};
+}
+function j2d(jy,jm,jd){const r=jalCal(jy,true);return g2d(r.gy,3,r.march)+(jm-1)*31-dv(jm,7)*(jm-7)+jd-1;}
+function jToMs(jy,jm,jd){const g=d2g(j2d(jy,jm,jd));return new Date(g.gy,g.gm-1,g.gd,0,0,0,0).getTime();}
+const toJ=ms=>{const d=new Date(ms);return d2j(g2d(d.getFullYear(),d.getMonth()+1,d.getDate()));};
+const JM=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const WD=['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+const FA='۰۱۲۳۴۵۶۷۸۹';
+const fa=n=>String(n).replace(/\d/g,d=>FA[d]);
+const jDate=ms=>{const j=toJ(ms);return fa(j.jd)+' '+JM[j.jm-1]+' '+fa(j.jy)};
+const jShort=ms=>{const j=toJ(ms);return fa(j.jd)+' '+JM[j.jm-1]};
+const wd=ms=>WD[new Date(ms).getDay()];
+const hm=ms=>{const d=new Date(ms);return fa(String(d.getHours()).padStart(2,'0'))+':'+fa(String(d.getMinutes()).padStart(2,'0'))};
+const dayKey=ms=>{const d=new Date(ms);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+const money=n=>fa(Math.round(n).toLocaleString('en-US'));
+
+/* ===================== داده ===================== */
+const API='https://script.google.com/macros/s/AKfycbwPhEQVUqfkgF4Twk2EyD_WgQ35j2-a3owt-eUY2qXnE-uUAIMtYNQMR7yP87wBRqdBaw/exec';
+const KEY='ytennis_att_v1';        // کش محلی برای کار آفلاین
+const TKEY='yt_att_token';
+let TOKEN='', ROLE='', UNAME='';
+let REV=0;                          // شماره نسخه‌ی سرور
+let dirty=false;                    // تغییر ذخیره‌نشده روی سرور
+
+let state={students:[],entries:[],settlements:[],partners:[],settings:{settleDay:5,teachRates:[700000,1000000],rentRate:1350000}};
+let filter='all',sortMode='urgent',query='',tab='att',pid=null;
+const $=id=>document.getElementById(id);
+const uid=()=>Math.random().toString(36).slice(2,9);
+const cur=s=>s.terms[s.terms.length-1];
+const used=s=>cur(s).sessions.length;
+const left=s=>Math.max(0,cur(s).size-used(s));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---- ارتباط با سرور ---- */
+async function apiGet(action){
+  const r=await fetch(API+'?action='+encodeURIComponent(action)+'&token='+encodeURIComponent(TOKEN));
+  return r.json();
+}
+async function apiPost(body){
+  const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});
+  return r.json();
+}
+function normalize(){
+  state.students=state.students||[];state.entries=state.entries||[];
+  state.settlements=state.settlements||[];state.partners=state.partners||[];
+  state.settings=Object.assign({settleDay:5,teachRates:[700000,1000000],rentRate:1350000},state.settings||{});
+  if(!state.partners.length)state.partners.push({id:uid(),name:'آکادمی همکار'});
+  if(!pid||!state.partners.some(x=>x.id===pid))pid=state.partners[0].id;
+}
+function cacheSave(){try{localStorage.setItem(KEY,JSON.stringify({rev:REV,state}))}catch(e){}}
+function cacheLoad(){
+  try{const raw=localStorage.getItem(KEY);if(!raw)return false;
+    const o=JSON.parse(raw);
+    if(o&&o.state){Object.assign(state,o.state);REV=o.rev||0;return true}
+    Object.assign(state,o);return true;
+  }catch(e){return false}
+}
+function setOffline(msg){
+  $('offbar').textContent=msg+' — تغییرات روی همین دستگاه می‌ماند و به‌محض وصل‌شدن ارسال می‌شود.';
+  $('offbar').classList.add('on');
+}
+function setOnline(){$('offbar').classList.remove('on')}
+
+async function pull(){
+  const r=await apiGet('att_load');
+  if(!r.success)throw new Error(r.error||'خطا در دریافت اطلاعات');
+  if(r.data&&r.data.json){try{Object.assign(state,JSON.parse(r.data.json))}catch(e){}}
+  REV=(r.data&&r.data.rev)||0;
+  normalize();cacheSave();setOnline();
+}
+async function load(){
+  const cached=cacheLoad();
+  normalize();
+  try{await pull()}
+  catch(e){if(cached)setOffline('اتصال به سرور برقرار نشد');else throw e}
+}
+
+let st=null;
+function save(){
+  dirty=true;cacheSave();
+  clearTimeout(st);
+  st=setTimeout(push,400);
+}
+async function push(){
+  if(!dirty)return;
+  $('sync').className='sync';$('sync').textContent='در حال ذخیره…';
+  try{
+    const r=await apiPost({module:'attendance',token:TOKEN,rev:REV,data:JSON.stringify(state)});
+    if(r.success){
+      REV=r.data.rev;dirty=false;cacheSave();setOnline();
+      $('sync').textContent='ذخیره شد ✓';
+      setTimeout(()=>{if(!dirty)$('sync').textContent=''},1600);
+      return;
+    }
+    if(r.conflict){
+      try{Object.assign(state,JSON.parse(r.data.json));REV=r.data.rev;normalize();cacheSave();render()}catch(e){}
+      dirty=false;
+      $('sync').className='sync err';$('sync').textContent='نسخه‌ی دستگاه دیگر بارگذاری شد';
+      toast('روی دستگاه دیگری تغییر جدیدتری ثبت شده بود — آخرین نسخه بارگذاری شد');
+      return;
+    }
+    if(/دسترسی غیرمجاز/.test(r.error||''))return logout('نشست منقضی شد — دوباره وارد شوید');
+    throw new Error(r.error||'خطای نامشخص');
+  }catch(e){
+    setOffline('ذخیره روی سرور انجام نشد');
+    $('sync').className='sync err';$('sync').textContent='ذخیره محلی شد — سرور در دسترس نیست';
+  }
+}
+window.addEventListener('online',()=>{if(dirty)push()});
+setInterval(()=>{if(dirty)push()},30000);
+
+/* ===================== تب‌ها ===================== */
+document.querySelector('.tabs').onclick=e=>{
+  const b=e.target.closest('button');if(!b)return;
+  tab=b.dataset.tab;
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  $('viewAtt').hidden=tab!=='att';$('viewFin').hidden=tab!=='fin';
+  $('title').textContent=tab==='att'?'حضور و غیاب':'حساب آکادمی همکار';
+  $('fab').textContent=tab==='att'?'+ هنرجوی جدید':'+ ثبت جلسه یا اجاره';
+  render();
+};
+
+/* ===================== حضور و غیاب ===================== */
+function renderAtt(){
+  const all=state.students;
+  $('s1').textContent=fa(all.length);
+  const sat=new Date();sat.setHours(0,0,0,0);sat.setDate(sat.getDate()-((sat.getDay()+1)%7));
+  let wk=0;all.forEach(s=>s.terms.forEach(t=>t.sessions.forEach(x=>{if(x.t>=sat.getTime())wk++})));
+  $('s2').textContent=fa(wk);
+  $('s3').textContent=fa(all.filter(s=>left(s)<=2).length);
+
+  let arr=all.filter(s=>!query||s.name.includes(query));
+  const today=new Date().getDay();
+  if(filter==='low')arr=arr.filter(s=>left(s)<=2&&left(s)>0);
+  if(filter==='done')arr=arr.filter(s=>left(s)===0);
+  if(filter==='today')arr=arr.filter(s=>(s.days||[]).includes(today));
+  arr.sort((a,b)=>sortMode==='name'?a.name.localeCompare(b.name,'fa'):left(a)-left(b)||a.name.localeCompare(b.name,'fa'));
+
+  $('list').innerHTML=arr.length?arr.map(cardHTML).join('')
+    :(all.length?'<div class="empty"><b>هنرجویی پیدا نشد</b>فیلتر یا جست‌وجو را تغییر دهید.</div>'
+                :'<div class="empty"><b>هنوز هنرجویی ثبت نشده</b>با دکمه پایین صفحه اولین هنرجو را اضافه کنید.</div>');
+}
+function cardHTML(s){
+  const t=cur(s),u=used(s),l=left(s),n=t.size;
+  const isToday=(s.days||[]).includes(new Date().getDay());
+  const prog=n<=16
+    ?'<div class="balls">'+Array.from({length:n},(_,i)=>'<div class="ball'+(i<u?' on':'')+'"></div>').join('')+'</div>'
+    :'<div class="bar"><i style="width:'+Math.round(u/n*100)+'%"></i></div>';
+  return `<div class="card ${l===0?'done':''}" data-id="${s.id}">
+    <div class="card-top"><div class="who"><span class="name">${esc(s.name)}</span>
+      <div class="meta">${esc(s.branch)} · ${esc(s.type)}${s.time?' · '+fa(s.time):''}
+        ${s.terms.length>1?'<span class="tag term">ترم '+fa(s.terms.length)+'</span>':''}
+        ${isToday?'<span class="tag today">کلاس امروز</span>':''}</div></div>
+      <div class="remain ${l===0?'zero':(l<=2?'low':'')}"><b>${fa(l)}</b><span>جلسه مانده</span></div></div>
+    ${prog}
+    <div class="card-actions">
+      ${l===0?'<button class="btn btn-clay" data-act="renew">شروع ترم جدید</button>'
+             :'<button class="btn btn-main" data-act="mark">ثبت حضور امروز</button>'}
+      <button class="btn btn-ghost" data-act="open">جزئیات</button></div>
+  </div>`;
+}
+function mark(s,ms){cur(s).sessions.push({t:ms||Date.now(),n:''});cur(s).sessions.sort((a,b)=>a.t-b.t);save();render()}
+function markToday(s){
+  const k=dayKey(Date.now());
+  if(cur(s).sessions.some(x=>dayKey(x.t)===k))return ask('برای «'+s.name+'» امروز یک جلسه ثبت شده. باز هم ثبت شود؟',()=>doMark(s));
+  doMark(s);
+}
+function doMark(s){
+  mark(s);const l=left(s);
+  toast('ثبت شد — '+fa(l)+' جلسه مانده',()=>{cur(s).sessions.pop();save();render()});
+  if(l===0)setTimeout(()=>toast('پکیج «'+s.name+'» تمام شد — وقت تمدید است'),2600);
+  else if(l<=2)setTimeout(()=>toast('فقط '+fa(l)+' جلسه از پکیج «'+s.name+'» مانده'),2600);
+}
+
+/* ===================== دوره تسویه ===================== */
+function period(){
+  const d=state.settings.settleDay,j=toJ(Date.now());
+  let sy=j.jy,sm=j.jm;
+  if(j.jd<d){sm--;if(sm<1){sm=12;sy--}}
+  let ey=sy,em=sm+1;if(em>12){em=1;ey++}
+  return{from:jToMs(sy,sm,d),to:jToMs(ey,em,d),endLabel:fa(d)+' '+JM[em-1]};
+}
+const openEntries=()=>state.entries.filter(e=>e.p===pid&&!e.s);
+function sums(list){
+  let teach=0,rent=0,tc=0,rc=0;
+  list.forEach(e=>{const v=e.rate*e.c;if(e.k==='teach'){teach+=v;tc+=e.c}else{rent+=v;rc+=e.c}});
+  return{teach,rent,tc,rc,net:teach-rent};
+}
+
+/* ===================== مالی ===================== */
+function renderFin(){
+  const p=period(),list=openEntries().sort((a,b)=>b.t-a.t),S=sums(list);
+  const partner=state.partners.find(x=>x.id===pid)||state.partners[0];
+  const days=Math.max(0,Math.ceil((p.to-Date.now())/86400000));
+  const dir=S.net>0?'آکادمی به شما بدهکار است':(S.net<0?'شما به آکادمی بدهکارید':'حساب تسویه است');
+  const hist=state.settlements.filter(x=>x.p===pid).sort((a,b)=>b.t-a.t).slice(0,6).map(x=>`
+    <div class="hist"><b>${money(Math.abs(x.net))} تومان</b> ${x.net>=0?'دریافتی':'پرداختی'}
+      <small>تسویه ${jDate(x.t)} · ${fa(x.tc)} جلسه تدریس، ${fa(x.rc)} ساعت اجاره</small></div>`).join('');
+
+  $('viewFin').innerHTML=`
+  ${state.partners.length>1?'<div class="chips">'+state.partners.map(x=>`<button class="chip ${x.id===pid?'on':''}" data-p="${x.id}">${esc(x.name)}</button>`).join('')+'</div>':''}
+
+  <div class="ledger">
+    <div class="period">دوره جاری · تا ${p.endLabel}</div>
+    <div class="dir">${dir}</div>
+    <div class="amt ${S.net>0?'pos':(S.net<0?'neg':'')}">${money(Math.abs(S.net))}<small>تومان</small></div>
+    <div class="split">
+      <div><b>${money(S.teach)}</b><span>تدریس · ${fa(S.tc)} جلسه</span></div>
+      <div><b>${money(S.rent)}</b><span>اجاره زمین · ${fa(S.rc)} ساعت</span></div>
+    </div>
+    <div class="due">${days===0?'امروز روز تسویه است':'تا تسویه بعدی '+fa(days)+' روز مانده'} · طرف قرارداد: ${esc(partner.name)}</div>
+  </div>
+
+  <div class="card-actions" style="margin-bottom:16px">
+    <button class="btn btn-main" data-act="addTeach">+ جلسه تدریس</button>
+    <button class="btn btn-clay" data-act="addRent">+ اجاره زمین</button>
+  </div>
+
+  ${list.length?list.map(entryHTML).join(''):'<div class="empty"><b>در این دوره چیزی ثبت نشده</b>هر جلسه‌ای که برای آکادمی همکار می‌روید یا هر ساعتی که زمین اجاره می‌کنید را همان روز ثبت کنید.</div>'}
+
+  ${list.length?`<button class="btn btn-dark" style="width:100%;margin-top:14px" data-act="settle">ثبت تسویه و بستن دوره</button>`:''}
+  ${hist?'<h3 style="margin:24px 0 8px;font-size:13px;color:var(--muted)">تسویه‌های قبلی</h3>'+hist:''}
+  <button class="btn btn-ghost" style="width:100%;margin-top:14px" data-act="finSettings">تنظیمات و نرخ‌ها</button>`;
+}
+function entryHTML(e){
+  return `<div class="entry" data-eid="${e.id}">
+    <div class="k ${e.k}"></div>
+    <div class="d"><b>${e.k==='teach'?'تدریس':'اجاره زمین'}${e.who?' — '+esc(e.who):''}</b>
+      <small>${jShort(e.t)} · ${wd(e.t)} · ${fa(e.c)} × ${money(e.rate)}${e.n?' · '+esc(e.n):''}</small></div>
+    <div class="v ${e.k==='rent'?'rent':''}">${e.k==='rent'?'−':'+'}${money(e.rate*e.c)}</div>
+    <button class="x" data-act="delEntry">×</button></div>`;
+}
+
+function entryForm(kind){
+  const g=new Date(),gd=g.getFullYear()+'-'+String(g.getMonth()+1).padStart(2,'0')+'-'+String(g.getDate()).padStart(2,'0');
+  const teach=kind==='teach';
+  const rates=teach?state.settings.teachRates:[state.settings.rentRate];
+  return `<div class="grab"></div>
+  <h2>${teach?'ثبت جلسه تدریس':'ثبت اجاره زمین'}</h2>
+  <div class="meta" style="color:var(--muted);font-size:12.5px">${teach?'جلسه‌ای که برای آکادمی همکار برگزار کرده‌اید — به نفع شما':'ساعتی که زمین اجاره کرده‌اید — به حساب شما بدهکار می‌شود'}</div>
+  <label>تاریخ</label><input type="date" id="e_date" value="${gd}">
+  <label>${teach?'نرخ هر جلسه (تومان)':'نرخ هر ساعت (تومان)'}</label>
+  <div class="daychips" id="e_rates">${rates.map((r,i)=>`<button type="button" class="daychip ${i===0?'on':''}" data-r="${r}">${money(r)}</button>`).join('')}
+    <button type="button" class="daychip" data-r="custom">مبلغ دیگر</button></div>
+  <input type="number" id="e_rate" inputmode="numeric" value="${rates[0]}" style="margin-top:8px">
+  <div class="row">
+    <div><label>${teach?'تعداد جلسه':'تعداد ساعت'}</label><input type="number" id="e_c" value="1" min="0.5" step="0.5"></div>
+    <div><label>${teach?'نام هنرجو (اختیاری)':'برای کدام هنرجو (اختیاری)'}</label><input type="text" id="e_who"></div>
+  </div>
+  <label>یادداشت (اختیاری)</label><input type="text" id="e_note">
+  <div class="row" style="margin-top:20px">
+    <button class="btn btn-ghost" data-act="cancel">انصراف</button>
+    <button class="btn ${teach?'btn-main':'btn-clay'}" data-act="saveEntry" data-k="${kind}">ثبت</button></div>`;
+}
+function finSettingsForm(){
+  const s=state.settings;
+  return `<div class="grab"></div>
+  <h2>تنظیمات حساب</h2>
+  <label>نام طرف قرارداد</label><input type="text" id="p_name" value="${esc((state.partners.find(x=>x.id===pid)||{}).name||'')}">
+  <label>روز تسویه در هر ماه</label><input type="number" id="p_day" min="1" max="31" value="${s.settleDay}">
+  <div class="row">
+    <div><label>نرخ تدریس ۱</label><input type="number" id="p_t1" value="${s.teachRates[0]}"></div>
+    <div><label>نرخ تدریس ۲</label><input type="number" id="p_t2" value="${s.teachRates[1]||''}"></div>
+  </div>
+  <label>نرخ اجاره زمین (هر ساعت)</label><input type="number" id="p_rent" value="${s.rentRate}">
+  <div class="row" style="margin-top:20px">
+    <button class="btn btn-ghost" data-act="cancel">انصراف</button>
+    <button class="btn btn-main" data-act="saveFin">ذخیره</button></div>
+  <button class="btn btn-ghost" style="width:100%;margin-top:9px" data-act="addPartner">افزودن آکادمی طرف قرارداد جدید</button>`;
+}
+function settleSheet(){
+  const p=period(),list=openEntries(),S=sums(list);
+  return `<div class="grab"></div>
+  <h2>تسویه دوره</h2>
+  <div class="card" style="margin-top:14px">
+    <div class="card-top"><div class="who"><span class="name">${S.net>0?'دریافت از آکادمی':(S.net<0?'پرداخت به آکادمی':'تسویه بدون مبلغ')}</span>
+      <div class="meta">${fa(S.tc)} جلسه تدریس · ${fa(S.rc)} ساعت اجاره</div></div></div>
+    <div style="font-size:28px;font-weight:800;margin-top:8px;color:${S.net<0?'var(--clay)':'var(--teal)'}">${money(Math.abs(S.net))} <span style="font-size:14px;color:var(--muted)">تومان</span></div>
+  </div>
+  <div class="note">با تأیید، این ${fa(list.length)} مورد بسته و به سابقه تسویه‌ها منتقل می‌شود. دوره جدید از صفر شروع می‌شود.</div>
+  <div class="row" style="margin-top:20px">
+    <button class="btn btn-ghost" data-act="cancel">انصراف</button>
+    <button class="btn btn-dark" data-act="doSettle">تسویه شد</button></div>`;
+}
+
+/* ===================== شیت‌ها ===================== */
+function openSheet(h){$('sheetIn').innerHTML=h;$('sheet').classList.add('on');$('scrim').classList.add('on')}
+function closeSheet(){$('sheet').classList.remove('on');$('scrim').classList.remove('on')}
+$('scrim').onclick=closeSheet;
+
+const BRANCHES=['قائمشهر','ساری','تهران'],TYPES=['خصوصی','گروهی','نیمه‌خصوصی'];
+function formHTML(s){
+  const e=s||{};
+  return `<div class="grab"></div><h2>${s?'ویرایش هنرجو':'هنرجوی جدید'}</h2>
+  <label>نام و نام خانوادگی</label><input type="text" id="f_name" value="${s?esc(e.name):''}" placeholder="مثلاً علی رضایی">
+  <div class="row">
+    <div><label>شعبه</label><select id="f_branch">${BRANCHES.map(b=>`<option ${e.branch===b?'selected':''}>${b}</option>`).join('')}</select></div>
+    <div><label>نوع کلاس</label><select id="f_type">${TYPES.map(b=>`<option ${e.type===b?'selected':''}>${b}</option>`).join('')}</select></div></div>
+  <div class="row">
+    <div><label>تعداد جلسات پکیج</label><input type="number" id="f_size" min="1" max="60" value="${s?cur(s).size:10}"></div>
+    <div><label>ساعت کلاس (اختیاری)</label><input type="time" id="f_time" value="${e.time||''}"></div></div>
+  <label>روزهای کلاس (اختیاری)</label>
+  <div class="daychips" id="f_days">${[6,0,1,2,3,4,5].map(d=>`<button type="button" class="daychip ${(e.days||[]).includes(d)?'on':''}" data-d="${d}">${WD[d]}</button>`).join('')}</div>
+  <label>یادداشت (اختیاری)</label><input type="text" id="f_note" value="${esc(e.note||'')}" placeholder="شماره تماس، سطح بازی، …">
+  <div class="row" style="margin-top:20px"><button class="btn btn-ghost" data-act="cancel">انصراف</button>
+  <button class="btn btn-main" data-act="save" data-id="${s?s.id:''}">ذخیره</button></div>`;
+}
+function detailHTML(s){
+  const t=cur(s),u=used(s),l=left(s);
+  const sess=t.sessions.map((x,i)=>`<div class="sess"><div class="n">${fa(i+1)}</div>
+    <div class="d">${jDate(x.t)} — ${wd(x.t)}<small>ساعت ${hm(x.t)}</small></div>
+    <button class="x" data-act="delsess" data-i="${i}">×</button></div>`).join('')||'<div class="past">هنوز جلسه‌ای ثبت نشده.</div>';
+  const past=s.terms.slice(0,-1).map((p,i)=>`<div class="past">ترم ${fa(i+1)} — ${fa(p.sessions.length)} جلسه${p.sessions.length?' · پایان: '+jShort(p.sessions[p.sessions.length-1].t):''}</div>`).join('');
+  const g=new Date(),gd=g.getFullYear()+'-'+String(g.getMonth()+1).padStart(2,'0')+'-'+String(g.getDate()).padStart(2,'0');
+  return `<div class="grab"></div><h2>${esc(s.name)}</h2>
+  <div class="meta" style="color:var(--muted);font-size:12.5px">${esc(s.branch)} · ${esc(s.type)} · ترم ${fa(s.terms.length)}${s.note?' · '+esc(s.note):''}</div>
+  <div class="card" style="margin-top:14px"><div class="card-top">
+    <div class="who"><span class="name">وضعیت پکیج</span><div class="meta">${fa(u)} جلسه از ${fa(t.size)} جلسه برگزار شده</div></div>
+    <div class="remain ${l===0?'zero':(l<=2?'low':'')}"><b>${fa(l)}</b><span>مانده</span></div></div>
+    ${t.size<=16?'<div class="balls">'+Array.from({length:t.size},(_,i)=>'<div class="ball'+(i<u?' on':'')+'"></div>').join('')+'</div>'
+      :'<div class="bar"><i style="width:'+Math.round(u/t.size*100)+'%"></i></div>'}
+    ${l===0?'<div class="note">پکیج تمام شده است. برای ادامه، ترم جدید را شروع کنید — سابقه ترم فعلی حفظ می‌شود.</div>':''}</div>
+  <h3>ثبت جلسه با تاریخ دلخواه</h3>
+  <div class="row"><input type="date" id="d_date" value="${gd}">
+    <input type="time" id="d_time" value="${String(g.getHours()).padStart(2,'0')}:${String(g.getMinutes()).padStart(2,'0')}"></div>
+  <button class="btn btn-main" style="width:100%;margin-top:9px" data-act="addsess">افزودن جلسه</button>
+  <h3>جلسات ترم جاری</h3>${sess}
+  ${past?'<h3>ترم‌های قبلی</h3>'+past:''}
+  <div class="row" style="margin-top:22px"><button class="btn btn-ghost" data-act="edit">ویرایش اطلاعات</button>
+  <button class="btn btn-ghost" data-act="renew">ترم جدید</button></div>
+  <button class="btn btn-ghost" style="width:100%;margin-top:9px;color:var(--clay);border-color:#EFD9CC" data-act="del">حذف هنرجو</button>`;
+}
+function backupHTML(){
+  return `<div class="grab"></div><h2>نسخه پشتیبان</h2>
+  <div class="note" style="margin-top:10px">اطلاعات روی سرور آکادمی ذخیره می‌شود و بین همه‌ی دستگاه‌ها یکی است. متن زیر یک نسخه‌ی اضافه برای اطمینان است.</div>
+  <h3>گرفتن نسخه پشتیبان</h3><textarea id="b_out" rows="5" readonly>${esc(JSON.stringify(state))}</textarea>
+  <button class="btn btn-main" style="width:100%;margin-top:9px" data-act="copy">کپی متن پشتیبان</button>
+  <h3>بازگرداندن اطلاعات</h3><textarea id="b_in" rows="4" placeholder="متن پشتیبان را اینجا بچسبانید…"></textarea>
+  <button class="btn btn-ghost" style="width:100%;margin-top:9px;color:var(--clay);border-color:#EFD9CC" data-act="restore">جایگزینی اطلاعات فعلی</button>
+  <h3>حساب کاربری</h3>
+  <div class="past">وارد شده به‌عنوان ${esc(UNAME||'—')}${ROLE?' · '+esc(ROLE):''}</div>
+  <button class="btn btn-ghost" style="width:100%" data-act="logout">خروج از حساب</button>`;
+}
+
+/* ===================== رویدادها ===================== */
+$('fab').onclick=()=>openSheet(tab==='att'?formHTML(null):entryForm('teach'));
+$('backupBtn').onclick=()=>openSheet(backupHTML());
+$('q').oninput=e=>{query=e.target.value.trim();render()};
+$('chips').onclick=e=>{
+  const b=e.target.closest('.chip');if(!b)return;
+  if(b.id==='sortBtn'){sortMode=sortMode==='urgent'?'name':'urgent';
+    b.textContent='مرتب‌سازی: '+(sortMode==='urgent'?'فوریت':'الفبا');return render()}
+  document.querySelectorAll('#chips .chip[data-f]').forEach(c=>c.classList.remove('on'));
+  b.classList.add('on');filter=b.dataset.f;render();
+};
+$('list').onclick=e=>{
+  const card=e.target.closest('.card');if(!card)return;
+  const s=state.students.find(x=>x.id===card.dataset.id);if(!s)return;
+  const btn=e.target.closest('[data-act]'),a=btn?btn.dataset.act:'open';
+  if(a==='mark')markToday(s);
+  else if(a==='renew')renew(s);
+  else{$('sheet').dataset.id=s.id;openSheet(detailHTML(s))}
+};
+$('viewFin').onclick=e=>{
+  const pc=e.target.closest('[data-p]');
+  if(pc){pid=pc.dataset.p;return render()}
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const a=b.dataset.act;
+  if(a==='addTeach')return openSheet(entryForm('teach'));
+  if(a==='addRent')return openSheet(entryForm('rent'));
+  if(a==='finSettings')return openSheet(finSettingsForm());
+  if(a==='settle')return openSheet(settleSheet());
+  if(a==='delEntry'){
+    const id=e.target.closest('[data-eid]').dataset.eid;
+    ask('این مورد حذف شود؟',()=>{state.entries=state.entries.filter(x=>x.id!==id);save();render();toast('حذف شد')});
+  }
+};
+$('sheetIn').onclick=e=>{
+  const rc=e.target.closest('#e_rates .daychip');
+  if(rc){document.querySelectorAll('#e_rates .daychip').forEach(x=>x.classList.remove('on'));rc.classList.add('on');
+    if(rc.dataset.r!=='custom')$('e_rate').value=rc.dataset.r;else $('e_rate').focus();return}
+  const dc=e.target.closest('.daychip');if(dc)return dc.classList.toggle('on');
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const a=b.dataset.act,s=state.students.find(x=>x.id===$('sheet').dataset.id);
+  if(a==='cancel')return closeSheet();
+  if(a==='logout'){closeSheet();return logout('')}
+
+  if(a==='save'){
+    const name=$('f_name').value.trim();if(!name)return toast('نام هنرجو را وارد کنید');
+    const size=Math.max(1,parseInt($('f_size').value)||10);
+    const days=[...document.querySelectorAll('#f_days .daychip.on')].map(x=>+x.dataset.d);
+    const data={name,branch:$('f_branch').value,type:$('f_type').value,time:$('f_time').value,days,note:$('f_note').value.trim()};
+    const id=b.dataset.id;
+    if(id){const t=state.students.find(x=>x.id===id);Object.assign(t,data);cur(t).size=size}
+    else state.students.push({id:uid(),...data,terms:[{id:uid(),start:Date.now(),size,sessions:[]}]});
+    save();render();closeSheet();return toast(id?'ذخیره شد':'هنرجو اضافه شد');
+  }
+  if(a==='addsess'&&s){
+    const d=$('d_date').value,t=$('d_time').value||'00:00';
+    if(!d)return toast('تاریخ را انتخاب کنید');
+    mark(s,new Date(d+'T'+t).getTime());openSheet(detailHTML(s));return toast('جلسه ثبت شد');
+  }
+  if(a==='delsess'&&s){cur(s).sessions.splice(+b.dataset.i,1);save();render();openSheet(detailHTML(s));return toast('جلسه حذف شد')}
+  if(a==='edit'&&s)return openSheet(formHTML(s));
+  if(a==='renew'&&s)return renew(s,true);
+  if(a==='del'&&s)return ask('«'+s.name+'» با تمام سوابقش حذف شود؟',()=>{
+    state.students=state.students.filter(x=>x.id!==s.id);save();render();closeSheet();toast('حذف شد')});
+
+  if(a==='saveEntry'){
+    const d=$('e_date').value;if(!d)return toast('تاریخ را انتخاب کنید');
+    const rate=parseInt($('e_rate').value)||0;if(rate<=0)return toast('مبلغ را وارد کنید');
+    const c=parseFloat($('e_c').value)||1;
+    state.entries.push({id:uid(),p:pid,k:b.dataset.k,t:new Date(d+'T12:00').getTime(),rate,c,
+      who:$('e_who').value.trim(),n:$('e_note').value.trim()});
+    save();render();closeSheet();return toast('ثبت شد — '+money(rate*c)+' تومان');
+  }
+  if(a==='saveFin'){
+    const p=state.partners.find(x=>x.id===pid);
+    p.name=$('p_name').value.trim()||p.name;
+    state.settings.settleDay=Math.min(28,Math.max(1,parseInt($('p_day').value)||5));
+    state.settings.teachRates=[parseInt($('p_t1').value)||700000,parseInt($('p_t2').value)||0].filter(Boolean);
+    state.settings.rentRate=parseInt($('p_rent').value)||1350000;
+    save();render();closeSheet();return toast('ذخیره شد');
+  }
+  if(a==='addPartner'){
+    const n=($('p_name').value||'').trim();
+    const np={id:uid(),name:n&&!state.partners.some(x=>x.name===n)?n:'آکادمی جدید'};
+    state.partners.push(np);pid=np.id;save();render();closeSheet();return toast('اضافه شد — از تنظیمات نامش را عوض کنید');
+  }
+  if(a==='doSettle'){
+    const list=openEntries();if(!list.length)return toast('موردی برای تسویه نیست');
+    const S=sums(list),sid=uid();
+    list.forEach(x=>x.s=sid);
+    state.settlements.push({id:sid,p:pid,t:Date.now(),net:S.net,teach:S.teach,rent:S.rent,tc:S.tc,rc:S.rc});
+    save();render();closeSheet();return toast('تسویه ثبت شد');
+  }
+  if(a==='copy'){const ta=$('b_out');ta.select();ta.setSelectionRange(0,999999);
+    try{document.execCommand('copy');toast('کپی شد')}catch(e){toast('متن را دستی انتخاب و کپی کنید')}return}
+  if(a==='restore'){
+    const v=$('b_in').value.trim();if(!v)return toast('متن پشتیبان خالی است');
+    return ask('اطلاعات فعلی با نسخه پشتیبان جایگزین شود؟',()=>{
+      try{const o=JSON.parse(v);if(!o.students)throw 0;Object.assign(state,o);
+        if(!state.partners||!state.partners.length)state.partners=[{id:uid(),name:'آکادمی همکار'}];
+        pid=state.partners[0].id;save();render();closeSheet();toast('بازگردانی شد')}
+      catch(e){toast('متن پشتیبان معتبر نیست')}});
+  }
+};
+function renew(s,fromSheet){
+  ask('ترم جدید برای «'+s.name+'» شروع شود؟ سابقه ترم فعلی حفظ می‌شود.',()=>{
+    s.terms.push({id:uid(),start:Date.now(),size:cur(s).size,sessions:[]});
+    save();render();if(fromSheet)openSheet(detailHTML(s));
+    toast('ترم '+fa(s.terms.length)+' شروع شد');
+  });
+}
+function render(){tab==='att'?renderAtt():renderFin()}
+
+let tT=null;
+function toast(msg,undo){
+  clearTimeout(tT);$('toastMsg').textContent=msg;
+  const b=$('toastAct');b.hidden=!undo;
+  b.onclick=()=>{if(undo)undo();$('toast').classList.remove('on')};
+  $('toast').classList.add('on');
+  tT=setTimeout(()=>$('toast').classList.remove('on'),undo?4500:2400);
+}
+let askFn=null;
+function ask(msg,fn){$('askMsg').textContent=msg;askFn=fn;$('ask').classList.add('on')}
+$('askNo').onclick=()=>$('ask').classList.remove('on');
+$('askYes').onclick=()=>{$('ask').classList.remove('on');if(askFn)askFn()};
+
+/* ===================== ورود ===================== */
+function logout(msg){
+  TOKEN='';try{sessionStorage.removeItem(TKEY)}catch(e){}
+  $('login').classList.add('on');
+  if(msg){$('lg_err').textContent=msg;$('lg_err').classList.add('on')}
+}
+async function doLogin(){
+  const u=$('lg_u').value.trim(), pw=$('lg_p').value;
+  if(!u||!pw){$('lg_err').textContent='نام کاربری و رمز را وارد کنید';$('lg_err').classList.add('on');return}
+  const btn=$('lg_go');btn.disabled=true;btn.textContent='در حال بررسی…';
+  $('lg_err').classList.remove('on');
+  try{
+    const r=await apiPost({action:'panel_login',username:u,password:pw});
+    const d=r.data||{};
+    if(!r.success||!d.token)throw new Error(r.error||'نام کاربری یا رمز اشتباه است');
+    TOKEN=d.token;ROLE=d.role||'';UNAME=d.name||u;
+    try{sessionStorage.setItem(TKEY,TOKEN)}catch(e){}
+    await boot();
+  }catch(e){
+    $('lg_err').textContent=e.message||'ورود انجام نشد';$('lg_err').classList.add('on');
+  }finally{btn.disabled=false;btn.textContent='ورود'}
+}
+$('lg_go').onclick=doLogin;
+$('lg_p').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+$('lg_u').addEventListener('keydown',e=>{if(e.key==='Enter')$('lg_p').focus()});
+
+async function boot(){
+  try{
+    await load();
+    $('login').classList.remove('on');
+    render();
+    if(dirty)push();
+  }catch(e){
+    logout(/دسترسی غیرمجاز/.test(e.message||'')?'نشست منقضی شد — دوباره وارد شوید':(e.message||'اتصال برقرار نشد'));
+  }
+}
+
+(async()=>{
+  try{TOKEN=sessionStorage.getItem(TKEY)||''}catch(e){}
+  if(TOKEN)await boot(); else $('login').classList.add('on');
+})();
+</script>
+</body>
+</html>
