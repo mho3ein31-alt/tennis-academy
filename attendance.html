@@ -342,18 +342,26 @@ async function load(){
 }
 
 let st=null;
+let changeSeq=0;
 function save(){
-  dirty=true;cacheSave();
+  dirty=true;changeSeq++;cacheSave();
   clearTimeout(st);
   st=setTimeout(push,400);
 }
+let pushing=false;
 async function push(){
-  if(!dirty)return;
+  if(!dirty||pushing)return;
+  pushing=true;
+  try{ await pushOnce(); }
+  finally{ pushing=false; if(dirty){clearTimeout(st);st=setTimeout(push,600)} }
+}
+async function pushOnce(){
   $('sync').className='sync';$('sync').textContent='در حال ذخیره…';
+  const sentAt=changeSeq;
   try{
     const r=await apiPost({module:'attendance',token:TOKEN,rev:REV,data:JSON.stringify(state)});
     if(r.success){
-      REV=r.data.rev;dirty=false;cacheSave();setOnline();
+      REV=r.data.rev;if(changeSeq===sentAt)dirty=false;cacheSave();setOnline();
       $('sync').textContent='ذخیره شد ✓';
       setTimeout(()=>{if(!dirty)$('sync').textContent=''},1600);
       return;
