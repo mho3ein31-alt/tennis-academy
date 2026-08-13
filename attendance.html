@@ -81,6 +81,11 @@ h1{margin:0;font-size:25px;font-weight:800;letter-spacing:-.01em}
 .btn-ghost{background:var(--surface);border-color:var(--line);color:var(--muted)}
 .btn-clay{background:var(--clay);color:#fff;flex:1}
 .btn-dark{background:var(--ink);color:#fff;flex:1}
+.btn-warn{background:var(--surface);border-color:#EFD9CC;color:var(--clay)}
+.tag.sid{background:#E7EFEE;color:var(--teal);font-weight:700}
+.tag.off{background:var(--ball);color:var(--teal-dark);font-weight:700}
+.ball.absent{background:#F0C9B8;border:1.5px solid var(--clay)}
+.ball.absent::after{display:none}
 
 .empty{background:var(--surface);border:1px dashed var(--line);border-radius:var(--radius);padding:34px 20px;text-align:center;color:var(--muted)}
 .empty b{display:block;color:var(--ink);font-size:17px;margin-bottom:6px}
@@ -199,7 +204,8 @@ input[type=password]:focus{border-color:var(--teal)}
 
   <div class="tabs">
     <button class="on" data-tab="att">حضور و غیاب</button>
-    <button data-tab="fin">حساب آکادمی همکار</button>
+    <button data-tab="fin">حساب همکار</button>
+    <button data-tab="rep">گزارش</button>
   </div>
 
   <div id="viewAtt">
@@ -223,6 +229,7 @@ input[type=password]:focus{border-color:var(--teal)}
   </div>
 
   <div id="viewFin" hidden></div>
+  <div id="viewRep" hidden></div>
 </div>
 
 <button class="fab" id="fab">+ هنرجوی جدید</button>
@@ -293,9 +300,28 @@ let filter='all',sortMode='urgent',query='',tab='att',pid=null;
 const $=id=>document.getElementById(id);
 const uid=()=>Math.random().toString(36).slice(2,9);
 const cur=s=>s.terms[s.terms.length-1];
-const used=s=>cur(s).sessions.length;
+const used=s=>(cur(s).sessions||[]).filter(x=>x.status!=='excused').length;
 const left=s=>Math.max(0,cur(s).size-used(s));
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ===== موتور شمارش جلسات و تخفیف ===== */
+const CFG=()=>Object.assign({loyaltyStep:30,loyaltyPercent:5,loyaltyMax:25},state.settings||{});
+function nextSid(){
+  let n=0;(state.students||[]).forEach(s=>{const m=/^ST-(\d+)$/.exec(s.sid||'');if(m)n=Math.max(n,+m[1])});
+  return 'ST-'+('00'+(n+1)).slice(-3);
+}
+const burned=t=>(t.sessions||[]).filter(x=>x.status!=='excused').length;
+const lifetime=s=>(s.terms||[]).reduce((n,t)=>n+burned(t),0);
+const attended=s=>(s.terms||[]).reduce((n,t)=>n+(t.sessions||[]).filter(x=>x.status!=='absent'&&x.status!=='excused').length,0);
+const absences=s=>(s.terms||[]).reduce((n,t)=>n+(t.sessions||[]).filter(x=>x.status==='absent').length,0);
+function loyaltyPct(s){const c=CFG();return Math.min(c.loyaltyMax,Math.floor(lifetime(s)/c.loyaltyStep)*c.loyaltyPercent)}
+function codePct(s){
+  if(!s.discountCode)return 0;
+  const c=(state.codes||[]).find(x=>x.active!==false&&x.code===s.discountCode);
+  return c?(+c.percent||0):0;
+}
+const finalPct=s=>Math.max(loyaltyPct(s),codePct(s));
+function toNextTier(s){const c=CFG();if(loyaltyPct(s)>=c.loyaltyMax)return null;return c.loyaltyStep-(lifetime(s)%c.loyaltyStep)}
 
 /* ---- ارتباط با سرور ---- */
 async function apiGet(action){
@@ -309,9 +335,19 @@ async function apiPost(body){
 function normalize(){
   state.students=state.students||[];state.entries=state.entries||[];
   state.settlements=state.settlements||[];state.partners=state.partners||[];
-  state.settings=Object.assign({settleDay:5,teachRates:[700000,1000000],rentRate:1350000},state.settings||{});
+  state.codes=state.codes||[];
+  state.settings=Object.assign({settleDay:5,teachRates:[700000,1000000],rentRate:1350000,
+    loyaltyStep:30,loyaltyPercent:5,loyaltyMax:25},state.settings||{});
   if(!state.partners.length)state.partners.push({id:uid(),name:'آکادمی همکار'});
   if(!pid||!state.partners.some(x=>x.id===pid))pid=state.partners[0].id;
+  migrate();
+}
+function migrate(){
+  let n=0;(state.students||[]).forEach(s=>{const m=/^ST-(\d+)$/.exec(s.sid||'');if(m)n=Math.max(n,+m[1])});
+  (state.students||[]).forEach(s=>{
+    if(!s.sid){n++;s.sid='ST-'+('00'+n).slice(-3)}
+    (s.terms||[]).forEach(t=>(t.sessions||[]).forEach(x=>{if(!x.status)x.status='present'}));
+  });
 }
 function cacheSave(){try{localStorage.setItem(KEY,JSON.stringify({rev:REV,state}))}catch(e){}}
 function cacheLoad(){
@@ -388,8 +424,9 @@ document.querySelector('.tabs').onclick=e=>{
   const b=e.target.closest('button');if(!b)return;
   tab=b.dataset.tab;
   document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
-  $('viewAtt').hidden=tab!=='att';$('viewFin').hidden=tab!=='fin';
-  $('title').textContent=tab==='att'?'حضور و غیاب':'حساب آکادمی همکار';
+  $('viewAtt').hidden=tab!=='att';$('viewFin').hidden=tab!=='fin';$('viewRep').hidden=tab!=='rep';
+  $('title').textContent=tab==='att'?'حضور و غیاب':(tab==='fin'?'حساب آکادمی همکار':'گزارش');
+  $('fab').hidden=tab==='rep';
   $('fab').textContent=tab==='att'?'+ هنرجوی جدید':'+ ثبت جلسه یا اجاره';
   render();
 };
@@ -417,31 +454,41 @@ function renderAtt(){
 function cardHTML(s){
   const t=cur(s),u=used(s),l=left(s),n=t.size;
   const isToday=(s.days||[]).includes(new Date().getDay());
+  const done=(t.sessions||[]).filter(x=>x.status!=='excused');
   const prog=n<=16
-    ?'<div class="balls">'+Array.from({length:n},(_,i)=>'<div class="ball'+(i<u?' on':'')+'"></div>').join('')+'</div>'
+    ?'<div class="balls">'+Array.from({length:n},(_,i)=>{const x=done[i];
+        return '<div class="ball'+(x?(x.status==='absent'?' absent':' on'):'')+'"></div>';}).join('')+'</div>'
     :'<div class="bar"><i style="width:'+Math.round(u/n*100)+'%"></i></div>';
   return `<div class="card ${l===0?'done':''}" data-id="${s.id}">
     <div class="card-top"><div class="who"><span class="name">${esc(s.name)}</span>
-      <div class="meta">${esc(s.branch)} · ${esc(s.type)}${s.time?' · '+fa(s.time):''}
+      <div class="meta">${s.sid?'<span class="tag sid">'+esc(s.sid)+'</span> ':''}${esc(s.branch)} · ${esc(s.type)}${s.time?' · '+fa(s.time):''}
         ${s.terms.length>1?'<span class="tag term">ترم '+fa(s.terms.length)+'</span>':''}
-        ${isToday?'<span class="tag today">کلاس امروز</span>':''}</div></div>
+        ${isToday?'<span class="tag today">کلاس امروز</span>':''}
+        ${finalPct(s)?'<span class="tag off">'+fa(finalPct(s))+'٪ تخفیف</span>':''}</div>
+      <div class="meta">مجموع ${fa(lifetime(s))} جلسه از ابتدا</div></div>
       <div class="remain ${l===0?'zero':(l<=2?'low':'')}"><b>${fa(l)}</b><span>جلسه مانده</span></div></div>
     ${prog}
     <div class="card-actions">
       ${l===0?'<button class="btn btn-clay" data-act="renew">شروع ترم جدید</button>'
-             :'<button class="btn btn-main" data-act="mark">ثبت حضور امروز</button>'}
+             :'<button class="btn btn-main" data-act="mark">حضور</button><button class="btn btn-warn" data-act="absent">غیبت</button>'}
       <button class="btn btn-ghost" data-act="open">جزئیات</button></div>
   </div>`;
 }
-function mark(s,ms){cur(s).sessions.push({t:ms||Date.now(),n:''});cur(s).sessions.sort((a,b)=>a.t-b.t);save();render()}
-function markToday(s){
+function mark(s,ms,status){cur(s).sessions.push({t:ms||Date.now(),n:'',status:status||'present'});cur(s).sessions.sort((a,b)=>a.t-b.t);save();render()}
+function markToday(s,status){
   const k=dayKey(Date.now());
-  if(cur(s).sessions.some(x=>dayKey(x.t)===k))return ask('برای «'+s.name+'» امروز یک جلسه ثبت شده. باز هم ثبت شود؟',()=>doMark(s));
-  doMark(s);
+  if(cur(s).sessions.some(x=>dayKey(x.t)===k))return ask('برای «'+s.name+'» امروز یک جلسه ثبت شده. باز هم ثبت شود؟',()=>doMark(s,status));
+  doMark(s,status);
 }
-function doMark(s){
-  mark(s);const l=left(s);
-  toast('ثبت شد — '+fa(l)+' جلسه مانده',()=>{cur(s).sessions.pop();save();render()});
+function askAbsence(s){
+  ask('غیبت «'+s.name+'» با اطلاع قبلی (بیش از ۲۴ ساعت) بوده؟ اگر بله، جلسه نمی‌سوزد.',
+    ()=>{mark(s,null,'excused');toast('غیبت موجه ثبت شد — جلسه نسوخت',()=>{cur(s).sessions.pop();save();render()})},
+    ()=>markToday(s,'absent'),'با اطلاع بود','بدون اطلاع');
+}
+function doMark(s,status){
+  status=status||'present';
+  mark(s,null,status);const l=left(s);
+  toast((status==='absent'?'غیبت ثبت شد':'حضور ثبت شد')+' — '+fa(l)+' جلسه مانده',()=>{cur(s).sessions.pop();save();render()});
   if(l===0)setTimeout(()=>toast('پکیج «'+s.name+'» تمام شد — وقت تمدید است'),2600);
   else if(l<=2)setTimeout(()=>toast('فقط '+fa(l)+' جلسه از پکیج «'+s.name+'» مانده'),2600);
 }
@@ -575,19 +622,32 @@ function formHTML(s){
     <div><label>ساعت کلاس (اختیاری)</label><input type="time" id="f_time" value="${e.time||''}"></div></div>
   <label>روزهای کلاس (اختیاری)</label>
   <div class="daychips" id="f_days">${[6,0,1,2,3,4,5].map(d=>`<button type="button" class="daychip ${(e.days||[]).includes(d)?'on':''}" data-d="${d}">${WD[d]}</button>`).join('')}</div>
+  <label>کد تخفیف (اختیاری)</label>
+  <select id="f_code"><option value="">— بدون کد —</option>${(state.codes||[]).filter(c=>c.active!==false).map(c=>`<option value="${esc(c.code)}" ${e.discountCode===c.code?'selected':''}>${esc(c.code)} — ${fa(c.percent)}٪</option>`).join('')}</select>
   <label>یادداشت (اختیاری)</label><input type="text" id="f_note" value="${esc(e.note||'')}" placeholder="شماره تماس، سطح بازی، …">
   <div class="row" style="margin-top:20px"><button class="btn btn-ghost" data-act="cancel">انصراف</button>
   <button class="btn btn-main" data-act="save" data-id="${s?s.id:''}">ذخیره</button></div>`;
 }
 function detailHTML(s){
   const t=cur(s),u=used(s),l=left(s);
+  const LB={present:'حاضر',absent:'غیبت بدون اطلاع',excused:'غیبت با اطلاع — نسوخت'};
   const sess=t.sessions.map((x,i)=>`<div class="sess"><div class="n">${fa(i+1)}</div>
-    <div class="d">${jDate(x.t)} — ${wd(x.t)}<small>ساعت ${hm(x.t)}</small></div>
+    <div class="d">${jDate(x.t)} — ${wd(x.t)}<small>ساعت ${hm(x.t)} · ${LB[x.status||'present']}</small></div>
     <button class="x" data-act="delsess" data-i="${i}">×</button></div>`).join('')||'<div class="past">هنوز جلسه‌ای ثبت نشده.</div>';
+  const lt=lifetime(s),att=attended(s),abs=absences(s),pct=finalPct(s),nt=toNextTier(s);
+  const rate=lt?Math.round(att/lt*100):0;
+  const record=`<h3>پرونده‌ی هنرجو</h3>
+    <div class="stats" style="margin-bottom:10px">
+      <div class="stat"><b>${fa(lt)}</b><span>کل جلسات</span></div>
+      <div class="stat"><b>${fa(rate)}٪</b><span>نرخ حضور</span></div>
+      <div class="stat ${abs?'alert':''}"><b>${fa(abs)}</b><span>غیبت</span></div>
+    </div>
+    <div class="past">${pct?('تخفیف فعلی <b>'+fa(pct)+'٪</b> — '+(loyaltyPct(s)>=codePct(s)?'وفاداری':'کد '+esc(s.discountCode))):'هنوز تخفیفی فعال نیست'}${nt!==null?' · '+fa(nt)+' جلسه تا پله‌ی بعدی':' · به سقف تخفیف رسیده'}</div>`;
   const past=s.terms.slice(0,-1).map((p,i)=>`<div class="past">ترم ${fa(i+1)} — ${fa(p.sessions.length)} جلسه${p.sessions.length?' · پایان: '+jShort(p.sessions[p.sessions.length-1].t):''}</div>`).join('');
   const g=new Date(),gd=g.getFullYear()+'-'+String(g.getMonth()+1).padStart(2,'0')+'-'+String(g.getDate()).padStart(2,'0');
   return `<div class="grab"></div><h2>${esc(s.name)}</h2>
-  <div class="meta" style="color:var(--muted);font-size:12.5px">${esc(s.branch)} · ${esc(s.type)} · ترم ${fa(s.terms.length)}${s.note?' · '+esc(s.note):''}</div>
+  <div class="meta" style="color:var(--muted);font-size:12.5px">${s.sid?esc(s.sid)+' · ':''}${esc(s.branch)} · ${esc(s.type)} · ترم ${fa(s.terms.length)}${s.note?' · '+esc(s.note):''}</div>
+  ${record}
   <div class="card" style="margin-top:14px"><div class="card-top">
     <div class="who"><span class="name">وضعیت پکیج</span><div class="meta">${fa(u)} جلسه از ${fa(t.size)} جلسه برگزار شده</div></div>
     <div class="remain ${l===0?'zero':(l<=2?'low':'')}"><b>${fa(l)}</b><span>مانده</span></div></div>
@@ -597,6 +657,10 @@ function detailHTML(s){
   <h3>ثبت جلسه با تاریخ دلخواه</h3>
   <div class="row"><input type="date" id="d_date" value="${gd}">
     <input type="time" id="d_time" value="${String(g.getHours()).padStart(2,'0')}:${String(g.getMinutes()).padStart(2,'0')}"></div>
+  <div class="daychips" id="d_status" style="margin-top:9px">
+    <button type="button" class="daychip on" data-st="present">حاضر</button>
+    <button type="button" class="daychip" data-st="absent">غیبت بدون اطلاع</button>
+    <button type="button" class="daychip" data-st="excused">غیبت با اطلاع</button></div>
   <button class="btn btn-main" style="width:100%;margin-top:9px" data-act="addsess">افزودن جلسه</button>
   <h3>جلسات ترم جاری</h3>${sess}
   ${past?'<h3>ترم‌های قبلی</h3>'+past:''}
@@ -604,6 +668,30 @@ function detailHTML(s){
   <button class="btn btn-ghost" data-act="renew">ترم جدید</button></div>
   <button class="btn btn-ghost" style="width:100%;margin-top:9px;color:var(--clay);border-color:#EFD9CC" data-act="del">حذف هنرجو</button>`;
 }
+function codesHTML(){
+  const c=CFG();
+  const list=(state.codes||[]).map(x=>`<div class="entry" data-code="${esc(x.code)}">
+    <div class="k ${x.active!==false?'teach':'rent'}"></div>
+    <div class="d"><b>${esc(x.code)} — ${fa(x.percent)}٪</b>
+      <small>${x.active!==false?'فعال':'غیرفعال'}${x.note?' · '+esc(x.note):''} · ${fa((state.students||[]).filter(s=>s.discountCode===x.code).length)} هنرجو</small></div>
+    <button class="btn btn-ghost" style="padding:6px 10px;font-size:12px" data-act="toggleCode">${x.active!==false?'غیرفعال':'فعال'}</button>
+    <button class="x" data-act="delCode">×</button></div>`).join('')||'<div class="past">هنوز کدی تعریف نشده.</div>';
+  return `<div class="grab"></div><h2>کدهای تخفیف</h2>
+  <div class="note" style="margin-top:10px">اگر هنرجویی هم کد داشته باشد و هم تخفیف وفاداری، <b>فقط بالاترین</b> اعمال می‌شود.</div>
+  <h3>کد جدید</h3>
+  <div class="row"><div><label>کد</label><input type="text" id="c_code" placeholder="INSTA20"></div>
+    <div><label>درصد</label><input type="number" id="c_pct" min="1" max="90" value="10"></div></div>
+  <label>توضیح (اختیاری)</label><input type="text" id="c_note" placeholder="کمپین اینستاگرام">
+  <button class="btn btn-main" style="width:100%;margin-top:9px" data-act="addCode">افزودن کد</button>
+  <h3>کدهای موجود</h3>${list}
+  <h3>پله‌های تخفیف وفاداری</h3>
+  <div class="row">
+    <div><label>هر چند جلسه</label><input type="number" id="c_step" value="${c.loyaltyStep}"></div>
+    <div><label>چند درصد</label><input type="number" id="c_pc" value="${c.loyaltyPercent}"></div>
+    <div><label>سقف</label><input type="number" id="c_max" value="${c.loyaltyMax}"></div></div>
+  <button class="btn btn-ghost" style="width:100%;margin-top:9px" data-act="saveTiers">ذخیره پله‌ها</button>`;
+}
+
 function backupHTML(){
   return `<div class="grab"></div><h2>نسخه پشتیبان</h2>
   <div class="note" style="margin-top:10px">اطلاعات روی سرور آکادمی ذخیره می‌شود و بین همه‌ی دستگاه‌ها یکی است. متن زیر یک نسخه‌ی اضافه برای اطمینان است.</div>
@@ -631,7 +719,8 @@ $('list').onclick=e=>{
   const card=e.target.closest('.card');if(!card)return;
   const s=state.students.find(x=>x.id===card.dataset.id);if(!s)return;
   const btn=e.target.closest('[data-act]'),a=btn?btn.dataset.act:'open';
-  if(a==='mark')markToday(s);
+  if(a==='mark')markToday(s,'present');
+  else if(a==='absent')askAbsence(s);
   else if(a==='renew')renew(s);
   else{$('sheet').dataset.id=s.id;openSheet(detailHTML(s))}
 };
@@ -653,26 +742,61 @@ $('sheetIn').onclick=e=>{
   const rc=e.target.closest('#e_rates .daychip');
   if(rc){document.querySelectorAll('#e_rates .daychip').forEach(x=>x.classList.remove('on'));rc.classList.add('on');
     if(rc.dataset.r!=='custom')$('e_rate').value=rc.dataset.r;else $('e_rate').focus();return}
+  const sc=e.target.closest('#d_status .daychip');
+  if(sc){document.querySelectorAll('#d_status .daychip').forEach(x=>x.classList.remove('on'));sc.classList.add('on');return}
   const dc=e.target.closest('.daychip');if(dc)return dc.classList.toggle('on');
   const b=e.target.closest('[data-act]');if(!b)return;
   const a=b.dataset.act,s=state.students.find(x=>x.id===$('sheet').dataset.id);
   if(a==='cancel')return closeSheet();
   if(a==='logout'){closeSheet();return logout('')}
+  if(a==='codes')return openSheet(codesHTML());
+  if(a==='addCode'){
+    const code=$('c_code').value.trim().toUpperCase();
+    const pct=parseInt($('c_pct').value)||0;
+    if(!code)return toast('کد را وارد کنید');
+    if(pct<1||pct>90)return toast('درصد باید بین ۱ تا ۹۰ باشد');
+    if((state.codes||[]).some(x=>x.code===code))return toast('این کد قبلاً تعریف شده');
+    state.codes.push({code,percent:pct,note:$('c_note').value.trim(),active:true});
+    save();render();openSheet(codesHTML());return toast('کد اضافه شد');
+  }
+  if(a==='toggleCode'){
+    const code=b.closest('[data-code]').dataset.code;
+    const x=state.codes.find(y=>y.code===code);if(x)x.active=(x.active===false);
+    save();render();openSheet(codesHTML());return;
+  }
+  if(a==='delCode'){
+    const code=b.closest('[data-code]').dataset.code;
+    const n=(state.students||[]).filter(x=>x.discountCode===code).length;
+    return ask('کد «'+code+'» حذف شود؟'+(n?' هم‌اکنون '+fa(n)+' هنرجو از آن استفاده می‌کنند.':''),()=>{
+      state.codes=state.codes.filter(x=>x.code!==code);
+      (state.students||[]).forEach(x=>{if(x.discountCode===code)x.discountCode=''});
+      save();render();openSheet(codesHTML());toast('حذف شد');
+    });
+  }
+  if(a==='saveTiers'){
+    state.settings.loyaltyStep=Math.max(1,parseInt($('c_step').value)||30);
+    state.settings.loyaltyPercent=Math.max(1,parseInt($('c_pc').value)||5);
+    state.settings.loyaltyMax=Math.max(1,parseInt($('c_max').value)||25);
+    save();render();openSheet(codesHTML());return toast('ذخیره شد');
+  }
 
   if(a==='save'){
     const name=$('f_name').value.trim();if(!name)return toast('نام هنرجو را وارد کنید');
     const size=Math.max(1,parseInt($('f_size').value)||10);
     const days=[...document.querySelectorAll('#f_days .daychip.on')].map(x=>+x.dataset.d);
-    const data={name,branch:$('f_branch').value,type:$('f_type').value,time:$('f_time').value,days,note:$('f_note').value.trim()};
+    const data={name,branch:$('f_branch').value,type:$('f_type').value,time:$('f_time').value,days,
+                note:$('f_note').value.trim(),discountCode:($('f_code')||{}).value||''};
     const id=b.dataset.id;
     if(id){const t=state.students.find(x=>x.id===id);Object.assign(t,data);cur(t).size=size}
-    else state.students.push({id:uid(),...data,terms:[{id:uid(),start:Date.now(),size,sessions:[]}]});
+    else state.students.push({id:uid(),sid:nextSid(),...data,terms:[{id:uid(),start:Date.now(),size,sessions:[]}]});
     save();render();closeSheet();return toast(id?'ذخیره شد':'هنرجو اضافه شد');
   }
   if(a==='addsess'&&s){
     const d=$('d_date').value,t=$('d_time').value||'00:00';
     if(!d)return toast('تاریخ را انتخاب کنید');
-    mark(s,new Date(d+'T'+t).getTime());openSheet(detailHTML(s));return toast('جلسه ثبت شد');
+    const sel=document.querySelector('#d_status .daychip.on');
+    mark(s,new Date(d+'T'+t).getTime(),sel?sel.dataset.st:'present');
+    $('sheet').dataset.id=s.id;openSheet(detailHTML(s));return toast('جلسه ثبت شد');
   }
   if(a==='delsess'&&s){cur(s).sessions.splice(+b.dataset.i,1);save();render();openSheet(detailHTML(s));return toast('جلسه حذف شد')}
   if(a==='edit'&&s)return openSheet(formHTML(s));
@@ -714,8 +838,7 @@ $('sheetIn').onclick=e=>{
     const v=$('b_in').value.trim();if(!v)return toast('متن پشتیبان خالی است');
     return ask('اطلاعات فعلی با نسخه پشتیبان جایگزین شود؟',()=>{
       try{const o=JSON.parse(v);if(!o.students)throw 0;Object.assign(state,o);
-        if(!state.partners||!state.partners.length)state.partners=[{id:uid(),name:'آکادمی همکار'}];
-        pid=state.partners[0].id;save();render();closeSheet();toast('بازگردانی شد')}
+        pid=null;normalize();save();render();closeSheet();toast('بازگردانی شد')}
       catch(e){toast('متن پشتیبان معتبر نیست')}});
   }
 };
@@ -726,7 +849,52 @@ function renew(s,fromSheet){
     toast('ترم '+fa(s.terms.length)+' شروع شد');
   });
 }
-function render(){tab==='att'?renderAtt():renderFin()}
+function lastSession(s){let m=0;(s.terms||[]).forEach(t=>(t.sessions||[]).forEach(x=>{if(x.t>m)m=x.t}));return m}
+function renderRep(){
+  const all=state.students||[],now=Date.now(),D=86400000;
+  const sat=new Date();sat.setHours(0,0,0,0);sat.setDate(sat.getDate()-((sat.getDay()+1)%7));
+  const from=sat.getTime()-21*D;
+  let weeks=[0,0,0,0];
+  all.forEach(s=>(s.terms||[]).forEach(t=>(t.sessions||[]).forEach(x=>{
+    if(x.status==='excused')return;
+    const w=Math.floor((x.t-from)/(7*D));if(w>=0&&w<4)weeks[w]++;})));
+  const totalSess=all.reduce((n,s)=>n+lifetime(s),0);
+  const totalAtt=all.reduce((n,s)=>n+attended(s),0);
+  const rate=totalSess?Math.round(totalAtt/totalSess*100):0;
+  const risk=all.filter(s=>{const L=lastSession(s);return L&&(now-L)>21*D&&left(s)>0}).sort((a,b)=>lastSession(a)-lastSession(b));
+  const near=all.filter(s=>{const n=toNextTier(s);return n!==null&&n<=3&&lifetime(s)>0}).sort((a,b)=>toNextTier(a)-toNextTier(b));
+  const byBranch={};all.forEach(s=>{byBranch[s.branch||'—']=(byBranch[s.branch||'—']||0)+1});
+  const maxW=Math.max(1,...weeks);
+  $('viewRep').innerHTML=`
+  <div class="stats">
+    <div class="stat"><b>${fa(all.length)}</b><span>هنرجو</span></div>
+    <div class="stat"><b>${fa(totalSess)}</b><span>کل جلسات</span></div>
+    <div class="stat ${rate<80?'alert':''}"><b>${fa(rate)}٪</b><span>نرخ حضور</span></div>
+  </div>
+  <h3 style="margin:18px 0 8px;font-size:13px;color:var(--muted)">جلسات چهار هفته‌ی اخیر</h3>
+  <div class="card"><div style="display:flex;align-items:flex-end;gap:10px;height:90px">
+    ${weeks.map((n,i)=>`<div style="flex:1;text-align:center">
+      <div style="background:var(--ball);border:1px solid var(--ball-deep);border-radius:6px 6px 0 0;height:${Math.round(n/maxW*64)+4}px"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:5px">${i===3?'این هفته':fa(4-i)+' هفته پیش'}</div>
+      <div style="font-size:13px;font-weight:700">${fa(n)}</div></div>`).join('')}
+  </div></div>
+  <h3 style="margin:18px 0 8px;font-size:13px;color:var(--muted)">در خطر ریزش — بیش از سه هفته نیامده‌اند</h3>
+  ${risk.length?risk.map(s=>`<div class="entry"><div class="k rent"></div>
+    <div class="d"><b>${esc(s.name)}</b><small>${s.sid?esc(s.sid)+' · ':''}${esc(s.branch)} · آخرین جلسه ${jShort(lastSession(s))} · ${fa(left(s))} جلسه مانده</small></div>
+    <div class="v rent">${fa(Math.round((now-lastSession(s))/D))} روز</div></div>`).join('')
+   :'<div class="past">کسی در خطر نیست — همه فعال‌اند.</div>'}
+  <h3 style="margin:18px 0 8px;font-size:13px;color:var(--muted)">نزدیک پله‌ی تخفیف بعدی</h3>
+  ${near.length?near.map(s=>`<div class="entry"><div class="k teach"></div>
+    <div class="d"><b>${esc(s.name)}</b><small>${fa(lifetime(s))} جلسه · الان ${fa(finalPct(s))}٪</small></div>
+    <div class="v">${fa(toNextTier(s))} جلسه مانده</div></div>`).join('')
+   :'<div class="past">کسی نزدیک پله‌ی بعدی نیست.</div>'}
+  <h3 style="margin:18px 0 8px;font-size:13px;color:var(--muted)">پراکندگی شعبه‌ها</h3>
+  ${Object.keys(byBranch).map(k=>`<div class="entry"><div class="k teach"></div>
+    <div class="d"><b>${esc(k)}</b></div><div class="v">${fa(byBranch[k])} هنرجو</div></div>`).join('')||'<div class="past">—</div>'}
+  <button class="btn btn-ghost" style="width:100%;margin-top:16px" data-act="codes">مدیریت کدهای تخفیف</button>`;
+}
+$('viewRep').onclick=e=>{const b=e.target.closest('[data-act]');if(b&&b.dataset.act==='codes')openSheet(codesHTML())};
+function render(){tab==='att'?renderAtt():(tab==='fin'?renderFin():renderRep())}
 
 let tT=null;
 function toast(msg,undo){
@@ -736,10 +904,14 @@ function toast(msg,undo){
   $('toast').classList.add('on');
   tT=setTimeout(()=>$('toast').classList.remove('on'),undo?4500:2400);
 }
-let askFn=null;
-function ask(msg,fn){$('askMsg').textContent=msg;askFn=fn;$('ask').classList.add('on')}
-$('askNo').onclick=()=>$('ask').classList.remove('on');
-$('askYes').onclick=()=>{$('ask').classList.remove('on');if(askFn)askFn()};
+let askFn=null,askNoFn=null;
+function ask(msg,fn,noFn,yesLabel,noLabel){
+  $('askMsg').textContent=msg;askFn=fn;askNoFn=noFn||null;
+  $('askYes').textContent=yesLabel||'تأیید';$('askNo').textContent=noLabel||'انصراف';
+  $('ask').classList.add('on');
+}
+$('askNo').onclick=()=>{$('ask').classList.remove('on');const f=askNoFn;askNoFn=null;if(f)f()};
+$('askYes').onclick=()=>{$('ask').classList.remove('on');askNoFn=null;if(askFn)askFn()};
 
 /* ===================== ورود ===================== */
 function logout(msg){
@@ -757,7 +929,7 @@ async function doLogin(){
     const d=r.data||{};
     if(!r.success||!d.token)throw new Error(r.error||'نام کاربری یا رمز اشتباه است');
     TOKEN=d.token;ROLE=d.role||'';UNAME=d.name||u;
-    try{sessionStorage.setItem(TKEY,TOKEN)}catch(e){}
+    try{sessionStorage.setItem(TKEY,TOKEN);sessionStorage.setItem(TKEY+'_r',ROLE);sessionStorage.setItem(TKEY+'_n',UNAME)}catch(e){}
     await boot();
   }catch(e){
     $('lg_err').textContent=e.message||'ورود انجام نشد';$('lg_err').classList.add('on');
@@ -767,10 +939,21 @@ $('lg_go').onclick=doLogin;
 $('lg_p').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
 $('lg_u').addEventListener('keydown',e=>{if(e.key==='Enter')$('lg_p').focus()});
 
+function applyRole(){
+  const isAdmin = ROLE==='admin' || ROLE==='';
+  document.querySelectorAll('.tabs button').forEach(b=>{if(b.dataset.tab!=='att')b.hidden=!isAdmin});
+  if(!isAdmin && tab!=='att'){
+    tab='att';
+    document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x.dataset.tab==='att'));
+    $('viewAtt').hidden=false;$('viewFin').hidden=true;$('viewRep').hidden=true;
+    $('title').textContent='حضور و غیاب';$('fab').hidden=false;$('fab').textContent='+ هنرجوی جدید';
+  }
+}
 async function boot(){
   try{
     await load();
     $('login').classList.remove('on');
+    applyRole();
     render();
     if(dirty)push();
   }catch(e){
@@ -779,7 +962,7 @@ async function boot(){
 }
 
 (async()=>{
-  try{TOKEN=sessionStorage.getItem(TKEY)||''}catch(e){}
+  try{TOKEN=sessionStorage.getItem(TKEY)||'';ROLE=sessionStorage.getItem(TKEY+'_r')||'';UNAME=sessionStorage.getItem(TKEY+'_n')||''}catch(e){}
   if(TOKEN)await boot(); else $('login').classList.add('on');
 })();
 </script>
